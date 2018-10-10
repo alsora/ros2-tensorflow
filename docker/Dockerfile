@@ -127,5 +127,53 @@ source $HOME/ros2_sdk/install/setup.sh' >> $HOME/.bashrc
 RUN echo ' \n\
 alias python="python3"' >> $HOME/.bashrc
 
+# add scripts folder to docker image
+COPY scripts $HOME/scripts
 
+
+######## ORBSLAM2 SETUP
+
+
+# create a workspace for orbslam
+RUN mkdir -p $HOME/orbslam
+WORKDIR $HOME/orbslam
+
+# install pangolin depenendencies
+RUN apt-get install -y \
+  libglew-dev \
+  cmake \
+  libpython2.7-dev \
+  ffmpeg
+
+# get pangolin sources
+RUN git clone https://github.com/stevenlovegrove/Pangolin.git
+RUN mkdir -p $HOME/orbslam/Pangolin/build
+WORKDIR $HOME/orbslam/Pangolin/build
+
+# build pangolin
+RUN cmake ..
+RUN cmake --build .
+
+# add pangolin shared library to path
+RUN echo ' \n\
+export LD_LIBRARY_PATH=~/orbslam/Pangolin/build/src/:$LD_LIBRARY_PATH' >> $HOME/.bashrc
+
+WORKDIR $HOME/orbslam
+
+# get orbslam sources
+RUN git clone https://github.com/raulmur/ORB_SLAM2.git
+
+# install orbslam depenendencies
+RUN apt-get install -y \
+  libboost-system-dev
+
+# build orbslam
+WORKDIR $HOME/orbslam/ORB_SLAM2
+RUN rm CMakeLists.txt
+RUN cp $HOME/scripts/CMakeLists.txt .
+RUN chmod +x $HOME/scripts/build.sh
+RUN /bin/bash -c 'source $HOME/.bashrc; \
+  $HOME/scripts/build.sh'
+
+#export LD_LIBRARY_PATH=~/orbslam/Pangolin/build/src/:$LD_LIBRARY_PATH
 
