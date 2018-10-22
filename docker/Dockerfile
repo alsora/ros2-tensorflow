@@ -131,49 +131,16 @@ alias python="python3"' >> $HOME/.bashrc
 COPY scripts $HOME/scripts
 
 
-######## ORBSLAM2 SETUP
+##### OPENCV3
 
+RUN apt-get install -y build-essential cmake git libgtk2.0-dev pkg-config libavcodec-dev libavformat-dev libswscale-dev python-dev python-numpy libtbb2 libtbb-dev libjpeg-dev libpng-dev libtiff-dev libjasper-dev libdc1394-22-dev
 
-# create a workspace for orbslam
-RUN mkdir -p $HOME/orbslam
-WORKDIR $HOME/orbslam
+RUN git clone -b 3.4 https://github.com/Itseez/opencv.git $HOME/opencv
+RUN mkdir $HOME/opencv/build
+WORKDIR $HOME/opencv/build
 
-# install pangolin depenendencies
-RUN apt-get install -y \
-  libglew-dev \
-  cmake \
-  libpython2.7-dev \
-  ffmpeg
-
-# get pangolin sources
-RUN git clone https://github.com/stevenlovegrove/Pangolin.git
-RUN mkdir -p $HOME/orbslam/Pangolin/build
-WORKDIR $HOME/orbslam/Pangolin/build
-
-# build pangolin
-RUN cmake ..
-RUN cmake --build .
-
-# add pangolin shared library to path
-RUN echo ' \n\
-export LD_LIBRARY_PATH=~/orbslam/Pangolin/build/src/:$LD_LIBRARY_PATH' >> $HOME/.bashrc
-
-WORKDIR $HOME/orbslam
-
-# get orbslam sources
-RUN git clone https://github.com/raulmur/ORB_SLAM2.git
-
-# install orbslam depenendencies
-RUN apt-get install -y \
-  libboost-system-dev
-
-# build orbslam
-WORKDIR $HOME/orbslam/ORB_SLAM2
-RUN rm CMakeLists.txt
-RUN cp $HOME/scripts/CMakeLists.txt .
-RUN chmod +x $HOME/scripts/build.sh
+RUN chmod +x $HOME/scripts/build_opencv.sh
 RUN /bin/bash -c 'source $HOME/.bashrc; \
-  $HOME/scripts/build.sh'
+  $HOME/scripts/build_opencv.sh'
 
-#export LD_LIBRARY_PATH=~/orbslam/Pangolin/build/src/:$LD_LIBRARY_PATH
 

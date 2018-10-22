@@ -42,6 +42,8 @@ def main(args=None):
 
         sleep(0.25)
 
+        break
+
 
     node.destroy_node()
     rclpy.shutdown()

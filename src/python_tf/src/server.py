@@ -42,7 +42,7 @@ def handle_classify_image_srv(request, response):
     b = datetime.now()
     c = b - a
 
-    print ("handle_classify_image_srv TOOK: ", c)
+    print ("handle_classify_image_srv took: ", c)
 
     return response
 
@@ -63,7 +63,7 @@ def main(args=None):
     tag = [tf.saved_model.tag_constants.SERVING]
     tf.saved_model.loader.load(session, tag, saved_model_dir)
 
-    print ("model_loaded")
+    print ("Model loaded!")
 
     rclpy.spin(node)
 

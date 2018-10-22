@@ -10,7 +10,7 @@ docker run -it --rm \
  -e DISPLAY=$DISPLAY \
  -v $XSOCK:$XSOCK \
  -v $HOME/.Xauthority:/root/.Xauthority \
- -v /home/alsora/source/alsora/ros2-tensorflow:/root/ros2-tensorflow \
+ -v $PWD/..:/root/ros2-tensorflow \
  --privileged \
  --net=host \
  ros2_tensorflow_gpu "$@"
