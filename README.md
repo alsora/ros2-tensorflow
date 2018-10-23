@@ -31,6 +31,7 @@ Build and source the workspace
 ## Usage
 
 Train a simple MNIST model
+
     $ cd ros2-tensorflow
     $ python create_mnist_model.py
 
