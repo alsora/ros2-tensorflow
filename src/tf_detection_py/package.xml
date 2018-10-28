@@ -1,7 +1,7 @@
 <?xml version="1.0"?>
 <?xml-model href="http://download.ros.org/schema/package_format2.xsd" schematypens="http://www.w3.org/2001/XMLSchema"?>
 <package format="2">
-  <name>python_tf</name>
+  <name>tf_detection_py</name>
   <version>0.5.1</version>
   <description>
     Python nodes which were previously in the ros2/examples repository but are now just used for demo purposes.
@@ -13,10 +13,15 @@
 
   <exec_depend>rclpy</exec_depend>
   <exec_depend>my_interfaces</exec_depend>
-  <exec_depend>std_msgs</exec_depend>
   <exec_depend>sensor_msgs</exec_depend>
-  <exec_depend>cv2</exec_depend>
+  <exec_depend>cv_bridge</exec_depend>
+  <depend>libopencv-dev</depend>
   <exec_depend>tensorflow</exec_depend>
+
+  <test_depend>ament_copyright</test_depend>
+  <test_depend>ament_flake8</test_depend>
+  <test_depend>ament_pep257</test_depend>
+  <test_depend>python3-pytest</test_depend>
 
   <export>
     <build_type>ament_python</build_type>

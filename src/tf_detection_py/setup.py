@@ -1,7 +1,7 @@
 from setuptools import find_packages
 from setuptools import setup
 
-package_name = 'python_tf'
+package_name = 'tf_detection_py'
 
 setup(
     name=package_name,
@@ -33,8 +33,9 @@ setup(
     tests_require=['pytest'],
     entry_points={
         'console_scripts': [
-            'server = src.server:main',
-            'client = src.client:main'
+            'server = detection.server:main',
+            'client_test = detection.client_test:main',
+            'subscriber = detection.subscriber:main'
         ],
     },
 )

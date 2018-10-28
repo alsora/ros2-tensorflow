@@ -1,5 +1,5 @@
 # @author Alberto Soragna (alberto dot soragna at gmail dot com)
-# @2018 
+# @2018
 
 FROM ubuntu:16.04
 MAINTAINER Alberto Soragna alberto dot soragna at gmail dot com
@@ -53,7 +53,7 @@ RUN apt-get update && apt-get install -y \
   python-rosdep \
   python3-vcstool \
   wget
-  
+
 RUN python3 -m pip install -U \
   argcomplete \
   flake8 \
@@ -78,7 +78,7 @@ RUN python3 -m pip install -U \
 # install Fast-RTPS dependencies
 RUN apt-get install --no-install-recommends -y \
   libasio-dev \
-  libtinyxml2-dev \  
+  libtinyxml2-dev \
   libopensplice67
 
 # create ros2 sdk workspace
@@ -96,41 +96,6 @@ RUN rosdep install --from-paths src --ignore-src --rosdistro bouncy -y --skip-ke
 RUN colcon build --symlink-install
 
 
-#### TENSORFLOW SETUP
-
-
-# install tensorflow
-#RUN export LD_LIBRARY_PATH=${LD_LIBRARY_PATH:+${LD_LIBRARY_PATH}:}/usr/local/cuda/extras/CUPTI/lib64
-RUN pip install tensorflow
-
-
-#### VISUALIZATION AND IMAGE PROCESSING TOOLS
-
-
-RUN apt-get install -y \
-  python3-tk \
-  libgtk2.0-dev
-
-RUN pip install \
-  matplotlib \
-  opencv-python
-
-
-#### SET ENVIRONMENT
-
-WORKDIR $HOME
-
-RUN echo ' \n\
-echo "Sourcing ROS2 packages..." \n\
-source $HOME/ros2_sdk/install/setup.sh' >> $HOME/.bashrc
-
-RUN echo ' \n\
-alias python="python3"' >> $HOME/.bashrc
-
-# add scripts folder to docker image
-COPY scripts $HOME/scripts
-
-
 ##### OPENCV3
 
 RUN apt-get install -y build-essential cmake git libgtk2.0-dev pkg-config libavcodec-dev libavformat-dev libswscale-dev python-dev python-numpy libtbb2 libtbb-dev libjpeg-dev libpng-dev libtiff-dev libjasper-dev libdc1394-22-dev
@@ -139,8 +104,102 @@ RUN git clone -b 3.4 https://github.com/Itseez/opencv.git $HOME/opencv
 RUN mkdir $HOME/opencv/build
 WORKDIR $HOME/opencv/build
 
+COPY scripts/build_opencv.sh $HOME/scripts/build_opencv.sh
 RUN chmod +x $HOME/scripts/build_opencv.sh
 RUN /bin/bash -c 'source $HOME/.bashrc; \
   $HOME/scripts/build_opencv.sh'
+
+
+#### TENSORFLOW SETUP
+
+WORKDIR $HOME
+
+# install tensorflow
+#RUN export LD_LIBRARY_PATH=${LD_LIBRARY_PATH:+${LD_LIBRARY_PATH}:}/usr/local/cuda/extras/CUPTI/lib64
+RUN pip install tensorflow
+
+
+# general python visualization packages
+RUN apt-get install -y \
+  python3-tk \
+  libgtk2.0-dev
+RUN pip install matplotlib opencv-python
+
+
+#### TENSORFLOW OBJECT DETECTION
+
+
+# tensorflow object detection dependencies
+RUN apt-get install -y \
+  protobuf-compiler \
+  python-pil \
+  python-lxml \
+  python-tk \
+  unzip
+RUN pip install \
+  Cython \
+  contextlib2 \
+  jupyter \
+  matplotlib \
+  opencv-python
+
+# get models and coco api
+RUN git clone https://github.com/tensorflow/models.git /usr/local/lib/python3.5/dist-packages/tensorflow/models
+RUN git clone https://github.com/cocodataset/cocoapi.git
+
+# build coco api
+WORKDIR $HOME/cocoapi/PythonAPI
+RUN rm Makefile
+COPY scripts/coco/Makefile $HOME/cocoapi/PythonAPI/Makefile
+RUN make
+RUN cp -r pycocotools /usr/local/lib/python3.5/dist-packages/tensorflow/models/research
+WORKDIR /usr/local/lib/python3.5/dist-packages/tensorflow/models/research
+RUN wget -O protobuf.zip https://github.com/google/protobuf/releases/download/v3.0.0/protoc-3.0.0-linux-x86_64.zip
+RUN unzip protobuf.zip
+RUN /bin/bash -c './bin/protoc object_detection/protos/*.proto --python_out=.'
+
+
+
+##### NETWORK MODELS
+
+# get mobilenet model for image detection
+WORKDIR /usr/local/lib/python3.5/dist-packages/tensorflow/models/research/object_detection
+RUN wget download.tensorflow.org/models/object_detection/ssd_mobilenet_v1_coco_2017_11_17.tar.gz
+RUN tar -xf ssd_mobilenet_v1_coco_2017_11_17.tar.gz
+
+# get inception model for image classification
+WORKDIR /usr/local/lib/python3.5/dist-packages/tensorflow/models/tutorial/image/imagenet
+RUN wget http://download.tensorflow.org/models/image/imagenet/inception-2015-12-05.tgz
+RUN mkdir inception-2015-12-05
+RUN tar -xf inception-2015-12-05.tgz -C inception-2015-12-05
+
+##### ROS2 WORKSPACE
+
+RUN apt-get install -y libcanberra-gtk-module libboost-all-dev
+
+RUN mkdir -p $HOME/ws/src
+WORKDIR $HOME/ws/src
+RUN git clone -b ros2 https://github.com/ros-perception/vision_opencv.git
+
+#### SET ENVIRONMENT
+
+
+WORKDIR $HOME
+
+RUN echo ' \n\
+echo "Sourcing ROS2 packages..." \n\
+source $HOME/ros2_sdk/install/setup.sh' >> $HOME/.bashrc
+
+RUN echo ' \n\
+export PYTHONPATH=$PYTHONPATH:/usr/local/lib/python3.5/dist-packages/tensorflow/models/research:/usr/local/lib/python3.5/dist-packages/tensorflow/models/research/slim' >> $HOME/.bashrc
+
+RUN echo ' \n\
+alias python="python3"' >> $HOME/.bashrc
+
+# add scripts folder to docker image
+COPY scripts $HOME/scripts
+
+
+
 
 
