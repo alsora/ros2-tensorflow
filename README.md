@@ -41,7 +41,6 @@ Build and source the workspace
 
 ## Usage
 
-<<<<<<< HEAD
 #### Image Detection Task
 
 Get a Tensorflow model for image detection ([mobilenet_v1](download.tensorflow.org/models/object_detection/ssd_mobilenet_v1_coco_2017_11_17.tar.gz)), uncompress it and place it inside the Tensorflow Models Object Detection directory at `/usr/local/lib/python3.5/dist-packages/tensorflow/models/research/object_detection`.
@@ -59,12 +58,6 @@ Real time image detection using your laptop camera
     $ ros2 run tf_detection_py_subscriber
     $ ros2 run image_tools cam2image -t camera -f 15
 
-=======
-Train a simple MNIST model
-
-    $ cd ros2-tensorflow
-    $ python create_mnist_model.py
->>>>>>> 8dbe432c0d97b604f3042b650699f85228c0ae36
 
 #### Image Classification Task
 
