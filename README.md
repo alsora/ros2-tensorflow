@@ -56,7 +56,7 @@ Real time image detection using your laptop camera
 
     $ rviz2
     $ ros2 run tf_detection_py_subscriber
-    $ ros2 run image_tools cam2image -t camera -f 15
+    $ ros2 run image_tools cam2image -t camera -f 5
 
 
 #### Image Classification Task
