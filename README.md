@@ -2,7 +2,7 @@
 
 Use Tensorflow to load pretrained neural networks and perform inference through ROS2 interfaces.
 
-<img src="/data/detection.png" alt="Rviz2 detection output"/>
+<img src="/data/detection.png" alt="Rviz2 detection output" width="50%" height="50%"/>
 The output can be directly visualized through Rviz
 
 ## Requirements
