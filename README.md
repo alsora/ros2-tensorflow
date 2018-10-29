@@ -31,10 +31,12 @@ Create a ROS2 workspace
     $ mkdir -p ws/src
 
 Add sources to workspace
+
     $ cd ws/src
     $ ln -s $HOME/ros2-tensorflow/src/* .
 
 Build and source the workspace
+
     $ cd ..
     $ colcon build
     $ source install/local_setup.sh
