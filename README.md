@@ -45,7 +45,7 @@ Build and source the workspace
 
 #### Image Detection Task
 
-Get a Tensorflow model for image detection ([mobilenet_v1](download.tensorflow.org/models/object_detection/ssd_mobilenet_v1_coco_2017_11_17.tar.gz)), uncompress it and place it inside the Tensorflow Models Object Detection directory at `/usr/local/lib/python3.5/dist-packages/tensorflow/models/research/object_detection`.
+Get a Tensorflow model for image detection ([mobilenet_v1](download.tensorflow.org/models/object_detection/ssd_mobilenet_v1_coco_2017_11_17.tar.gz)), uncompress it and place it inside the Tensorflow Models Object Detection directory at `/usr/local/lib/python3.6/dist-packages/tensorflow/models/research/object_detection`.
 
 **NOTE**:If you want to use a different model or you installed Tensorflow Models in a different place, make sure to edit the paths inside the nodes and build again the workspace.
 
@@ -63,7 +63,7 @@ Real time image detection using your laptop camera
 
 #### Image Classification Task
 
-Get a Tensorflow model for image classification ([inception network](http://download.tensorflow.org/models/image/imagenet/inception-2015-12-05.tgz)), uncompress it and place it inside the Tensorflow Models Imagenet directory at `/usr/local/lib/python3.5/dist-packages/tensorflow/models/tutorial/image/imagenet`.
+Get a Tensorflow model for image classification ([inception network](http://download.tensorflow.org/models/image/imagenet/inception-2015-12-05.tgz)), uncompress it and place it inside the Tensorflow Models Imagenet directory at `/usr/local/lib/python3.6/dist-packages/tensorflow/models/tutorial/image/imagenet`.
 
 **NOTE**:If you want to use a different model or you installed Tensorflow Models in a different place, make sure to edit the paths inside the nodes and build again the workspace.
 
