@@ -7,12 +7,12 @@ The output can be directly visualized through Rviz
 
 ## Requirements
 
- - [ROS2 Bouncy](https://index.ros.org/doc/ros2/Installation/)
+ - [ROS2 Eloquent](https://index.ros.org/doc/ros2/Installation/)
  - [Tensorflow](https://www.tensorflow.org/install/)
  - [Tensorflow Models](https://github.com/tensorflow/models/blob/master/research/object_detection/g3doc/installation.md)
  - [OpenCV3](https://docs.opencv.org/3.0-beta/doc/tutorials/introduction/linux_install/linux_install.html)
 
-The provided Dockerfile contains an Ubuntu 16.04 environment with all the dependencies already installed.
+The provided Dockerfile contains an Ubuntu 18.04 environment with all the dependencies already installed.
 
 To use the Dockerfile:
 
@@ -52,13 +52,13 @@ Get a Tensorflow model for image detection ([mobilenet_v1](download.tensorflow.o
 Test the image detection service by running in separate terminals
 
     $ ros2 run tf_detection_py server
-    $ ro2s run tf_detection_py client_test
+    $ ros2 run tf_detection_py client_test
 
 Real time image detection using your laptop camera
 
     $ rviz2
-    $ ros2 run tf_detection_py_subscriber
-    $ ros2 run image_tools cam2image -t camera -f 5
+    $ ros2 run tf_detection_py subscriber
+    $ ros2 run image_tools cam2image --ros-args -p topic:=camera -p frequency:=5.0
 
 
 #### Image Classification Task
@@ -70,4 +70,4 @@ Get a Tensorflow model for image classification ([inception network](http://down
 Test the image classification service by running in separate terminals
 
     $ ros2 run tf_classification_py server
-    $ ro2s run tf_classification_py client_test
+    $ ros2 run tf_classification_py client_test

@@ -1,0 +1,30 @@
+<?xml version="1.0"?>
+<?xml-model href="http://download.ros.org/schema/package_format2.xsd" schematypens="http://www.w3.org/2001/XMLSchema"?>
+<package format="2">
+  <name>tf_detection_py</name>
+  <version>0.0.2</version>
+  <description>
+  Python nodes for image detection tasks using Tensorflow
+  </description>
+  <maintainer email="alberto.soragna@gmail.com">Alberto Soragna</maintainer>
+  <license>Apache License 2.0</license>
+
+  <author email="alberto.soragna@gmail.com">Alberto Soragna</author>
+
+  <depend>libopencv-dev</depend>
+  <depend>tensorflow</depend>
+
+  <exec_depend>rclpy</exec_depend>
+  <exec_depend>tf_interfaces</exec_depend>
+  <exec_depend>ros2_tensorflow</exec_depend>
+  <exec_depend>sensor_msgs</exec_depend>
+
+  <test_depend>ament_copyright</test_depend>
+  <test_depend>ament_flake8</test_depend>
+  <test_depend>ament_pep257</test_depend>
+  <test_depend>python3-pytest</test_depend>
+
+  <export>
+    <build_type>ament_python</build_type>
+  </export>
+</package>

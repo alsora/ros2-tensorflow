@@ -1,8 +1,8 @@
 # @author Alberto Soragna (alberto dot soragna at gmail dot com)
 # @2018
 
-FROM ubuntu:16.04
-MAINTAINER Alberto Soragna alberto dot soragna at gmail dot com
+FROM osrf/ros:eloquent-desktop
+LABEL maintainer="alberto dot soragna at gmail dot com"
 
 # working directory
 ENV HOME /root
@@ -19,42 +19,35 @@ RUN apt-get update && apt-get install -y \
     wget \
     curl \
     git \
+    gdb \
     vim \
     nano \
     python-dev \
     python3-pip \
-    ipython
+    ipython \
+    unzip
 
 # pip
 RUN pip3 install --upgrade pip
 
-
 #### ROS2 SETUP
-
 
 # Locale options
 RUN apt-get install -y locales
-RUN locale-gen en_US.UTF-8
-RUN update-locale LC_ALL=en_US.UTF-8 LANG=en_US.UTF-8
-ENV LANG en_US.UTF-8
+ENV LANG C.UTF-8
+ENV LC_ALL C.UTF-8
 
-# setup sources
-RUN apt-get install -y lsb-release
-RUN curl http://repo.ros2.org/repos.key | apt-key add -
-RUN sh -c 'echo "deb [arch=amd64,arm64] http://repo.ros2.org/ubuntu/main `lsb_release -cs` main" > /etc/apt/sources.list.d/ros2-latest.list'
-
-# ROS setup requirements
-RUN apt-get update && apt-get install -y \
+# install development tools and ROS tools
+RUN apt-get install -y \
   build-essential \
   cmake \
-  git \
+  python3-catkin-pkg-modules \
   python3-colcon-common-extensions \
-  python3-pip \
-  python-rosdep \
-  python3-vcstool \
-  wget
+  python3-rosdep \
+  python3-vcstool
 
-RUN python3 -m pip install -U \
+# install python packages
+RUN pip3 install -U \
   argcomplete \
   flake8 \
   flake8-blind-except \
@@ -66,10 +59,7 @@ RUN python3 -m pip install -U \
   flake8-import-order \
   flake8-quotes \
   pytest-repeat \
-  pytest-rerunfailures
-
-# install additional ubuntu 16.04 requirements
-RUN python3 -m pip install -U \
+  pytest-rerunfailures \
   pytest \
   pytest-cov \
   pytest-runner \
@@ -78,37 +68,46 @@ RUN python3 -m pip install -U \
 # install Fast-RTPS dependencies
 RUN apt-get install --no-install-recommends -y \
   libasio-dev \
-  libtinyxml2-dev \
-  libopensplice67
+  libtinyxml2-dev
 
-# create ros2 sdk workspace
-RUN mkdir -p $HOME/ros2_sdk/src
-WORKDIR $HOME/ros2_sdk
-RUN wget https://raw.githubusercontent.com/ros2/ros2/release-latest/ros2.repos
-RUN vcs import src < ros2.repos
+# install CycloneDDS dependencies
+RUN apt-get install --no-install-recommends -y \
+  libcunit1-dev
 
-# initialize rosdep and install dependencies
-RUN rosdep init
-RUN rosdep update
-RUN rosdep install --from-paths src --ignore-src --rosdistro bouncy -y --skip-keys "console_bridge fastcdr fastrtps libopensplice67 rti-connext-dds-5.3.1 urdfdom_headers"
+# package required for building rviz plugins, but not included in base image
+RUN apt-get install -y ros-eloquent-rviz-visual-testing-framework
 
-# build the workspace
-RUN colcon build --symlink-install
+# install rqt tools
+RUN apt-get install -y \
+    ros-eloquent-python-qt-binding \
+    ros-eloquent-qt-gui-core \
+    ros-eloquent-rqt*
 
+# install cycloneDDS RMW implementation
+RUN apt-get install -y ros-eloquent-rmw-cyclonedds-cpp
 
 ##### OPENCV3
 
-RUN apt-get install -y build-essential cmake git libgtk2.0-dev pkg-config libavcodec-dev libavformat-dev libswscale-dev python-dev python-numpy libtbb2 libtbb-dev libjpeg-dev libpng-dev libtiff-dev libjasper-dev libdc1394-22-dev
+RUN apt-get install -y software-properties-common
+RUN add-apt-repository "deb http://security.ubuntu.com/ubuntu xenial-security main"
 
-RUN git clone -b 3.4 https://github.com/Itseez/opencv.git $HOME/opencv
+RUN apt-get update && apt-get install -y build-essential cmake git libgtk2.0-dev pkg-config libavcodec-dev libavformat-dev libswscale-dev python-dev python-numpy libtbb2 libtbb-dev libjpeg-dev libpng-dev libtiff-dev libjasper-dev libjasper1 libdc1394-22-dev
+
+RUN wget -O $HOME/opencv.zip https://github.com/opencv/opencv/archive/3.4.4.zip -q --show-progress --progress=bar:force 2>&1
+RUN wget -O $HOME/opencv_contrib.zip https://github.com/opencv/opencv_contrib/archive/3.4.4.zip -q --show-progress --progress=bar:force 2>&1
+
+RUN unzip -q $HOME/opencv.zip
+RUN unzip -q $HOME/opencv_contrib.zip
+RUN mv $HOME/opencv-3.4.4 $HOME/opencv
+RUN mv $HOME/opencv_contrib-3.4.4 $HOME/opencv_contrib
+RUN rm $HOME/opencv.zip $HOME/opencv_contrib.zip
+
 RUN mkdir $HOME/opencv/build
 WORKDIR $HOME/opencv/build
-
 COPY scripts/build_opencv.sh $HOME/scripts/build_opencv.sh
 RUN chmod +x $HOME/scripts/build_opencv.sh
 RUN /bin/bash -c 'source $HOME/.bashrc; \
   $HOME/scripts/build_opencv.sh'
-
 
 #### TENSORFLOW SETUP
 
@@ -118,88 +117,74 @@ WORKDIR $HOME
 #RUN export LD_LIBRARY_PATH=${LD_LIBRARY_PATH:+${LD_LIBRARY_PATH}:}/usr/local/cuda/extras/CUPTI/lib64
 RUN pip install tensorflow
 
-
 # general python visualization packages
 RUN apt-get install -y \
   python3-tk \
   libgtk2.0-dev
 RUN pip install matplotlib opencv-python
 
-
 #### TENSORFLOW OBJECT DETECTION
-
 
 # tensorflow object detection dependencies
 RUN apt-get install -y \
   protobuf-compiler \
   python-pil \
   python-lxml \
-  python-tk \
-  unzip
+  python-tk
 RUN pip install \
   Cython \
   contextlib2 \
-  jupyter \
-  matplotlib \
-  opencv-python
+  jupyter
 
-# get models and coco api
-RUN git clone https://github.com/tensorflow/models.git /usr/local/lib/python3.5/dist-packages/tensorflow/models
-RUN git clone https://github.com/cocodataset/cocoapi.git
+# get models
+RUN git clone https://github.com/tensorflow/models.git /usr/local/lib/python3.6/dist-packages/tensorflow/models
+WORKDIR /usr/local/lib/python3.6/dist-packages/tensorflow/models
+COPY scripts/label_map_util.patch /usr/local/lib/python3.6/dist-packages/tensorflow/models/label_map_util.patch
+RUN git apply label_map_util.patch
 
 # build coco api
+RUN git clone https://github.com/cocodataset/cocoapi.git
 WORKDIR $HOME/cocoapi/PythonAPI
 RUN rm Makefile
 COPY scripts/coco/Makefile $HOME/cocoapi/PythonAPI/Makefile
 RUN make
-RUN cp -r pycocotools /usr/local/lib/python3.5/dist-packages/tensorflow/models/research
-WORKDIR /usr/local/lib/python3.5/dist-packages/tensorflow/models/research
-RUN wget -O protobuf.zip https://github.com/google/protobuf/releases/download/v3.0.0/protoc-3.0.0-linux-x86_64.zip
-RUN unzip protobuf.zip
+RUN cp -r pycocotools /usr/local/lib/python3.6/dist-packages/tensorflow/models/research
+WORKDIR /usr/local/lib/python3.6/dist-packages/tensorflow/models/research
+RUN wget -O protobuf.zip https://github.com/google/protobuf/releases/download/v3.0.0/protoc-3.0.0-linux-x86_64.zip -q --show-progress --progress=bar:force 2>&1
+RUN unzip -q protobuf.zip
 RUN /bin/bash -c './bin/protoc object_detection/protos/*.proto --python_out=.'
-
-
 
 ##### NETWORK MODELS
 
 # get mobilenet model for image detection
-WORKDIR /usr/local/lib/python3.5/dist-packages/tensorflow/models/research/object_detection
-RUN wget download.tensorflow.org/models/object_detection/ssd_mobilenet_v1_coco_2017_11_17.tar.gz
+WORKDIR /usr/local/lib/python3.6/dist-packages/tensorflow/models/research/object_detection
+RUN wget download.tensorflow.org/models/object_detection/ssd_mobilenet_v1_coco_2017_11_17.tar.gz -q --show-progress --progress=bar:force 2>&1
 RUN tar -xf ssd_mobilenet_v1_coco_2017_11_17.tar.gz
 
 # get inception model for image classification
-WORKDIR /usr/local/lib/python3.5/dist-packages/tensorflow/models/tutorial/image/imagenet
-RUN wget http://download.tensorflow.org/models/image/imagenet/inception-2015-12-05.tgz
+WORKDIR /usr/local/lib/python3.6/dist-packages/tensorflow/models/tutorial/image/imagenet
+RUN wget http://download.tensorflow.org/models/image/imagenet/inception-2015-12-05.tgz -q --show-progress --progress=bar:force 2>&1
 RUN mkdir inception-2015-12-05
 RUN tar -xf inception-2015-12-05.tgz -C inception-2015-12-05
 
-##### ROS2 WORKSPACE
+##### ROS2 VISION OPEN CV
 
 RUN apt-get install -y libcanberra-gtk-module libboost-all-dev
 
-RUN mkdir -p $HOME/ws/src
-WORKDIR $HOME/ws/src
+RUN mkdir -p $HOME/ros2_vision_opencv_ws/src
+WORKDIR $HOME/ros2_vision_opencv_ws/src
 RUN git clone -b ros2 https://github.com/ros-perception/vision_opencv.git
 
 #### SET ENVIRONMENT
-
 
 WORKDIR $HOME
 
 RUN echo ' \n\
 echo "Sourcing ROS2 packages..." \n\
-source $HOME/ros2_sdk/install/setup.sh' >> $HOME/.bashrc
+source /opt/ros/eloquent/setup.sh' >> $HOME/.bashrc
 
 RUN echo ' \n\
-export PYTHONPATH=$PYTHONPATH:/usr/local/lib/python3.5/dist-packages/tensorflow/models/research:/usr/local/lib/python3.5/dist-packages/tensorflow/models/research/slim' >> $HOME/.bashrc
+export PYTHONPATH=$PYTHONPATH:/usr/local/lib/python3.6/dist-packages/tensorflow/models/research:/usr/local/lib/python3.6/dist-packages/tensorflow/models/research/slim' >> $HOME/.bashrc
 
 RUN echo ' \n\
 alias python="python3"' >> $HOME/.bashrc
-
-# add scripts folder to docker image
-COPY scripts $HOME/scripts
-
-
-
-
-
