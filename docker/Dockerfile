@@ -143,7 +143,7 @@ COPY scripts/label_map_util.patch /usr/local/lib/python3.6/dist-packages/tensorf
 RUN git apply label_map_util.patch
 
 # build coco api
-RUN git clone https://github.com/cocodataset/cocoapi.git
+RUN git clone https://github.com/cocodataset/cocoapi.git $HOME/cocoapi
 WORKDIR $HOME/cocoapi/PythonAPI
 RUN rm Makefile
 COPY scripts/coco/Makefile $HOME/cocoapi/PythonAPI/Makefile
