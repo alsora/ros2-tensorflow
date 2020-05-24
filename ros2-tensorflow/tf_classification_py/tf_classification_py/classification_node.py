@@ -1,6 +1,3 @@
-import rclpy
-from rclpy.node import Node
-
 import tensorflow as tf
 import os
 import numpy as np
@@ -11,7 +8,7 @@ from ros2_tensorflow.node.tensorflow_node import TensorflowNode
 from ros2_tensorflow.utils import img_conversion
 
 TENSORFLOW_DIR = os.path.dirname(tf.__file__)
-TENSORFLOW_IMAGENET_DIR =  os.path.join(TENSORFLOW_DIR, 'models/tutorial/image/imagenet')
+TENSORFLOW_IMAGENET_DIR = os.path.join(TENSORFLOW_DIR, 'models/tutorial/image/imagenet')
 
 MODEL_NAME = 'inception-2015-12-05'
 PATH_TO_FROZEN_MODEL = os.path.join(os.path.join(TENSORFLOW_IMAGENET_DIR, MODEL_NAME), 'classify_image_graph_def.pb')
@@ -31,8 +28,6 @@ class ClassificationNode(TensorflowNode):
         self.image_tensor = self.graph.get_tensor_by_name('DecodeJpeg:0')
         self.softmax_tensor = self.graph.get_tensor_by_name('softmax:0')
 
-        self.get_logger().info("load model completed!")
-
         self.warmup()
         
 
@@ -48,7 +43,7 @@ class ClassificationNode(TensorflowNode):
                 feed_dict={self.image_tensor: image_np})
 
         elapsed_time = datetime.now() - start_time
-        self.get_logger().info("image classification took: %r milliseconds" % (elapsed_time.total_seconds() * 1000))
+        self.get_logger().debug("Image classification took: %r milliseconds" % (elapsed_time.total_seconds() * 1000))
 
         return predictions
 
@@ -59,8 +54,7 @@ class ClassificationNode(TensorflowNode):
 
         self.classify(image_np)
 
-        self.get_logger().info("warmup completed!")
-        self.get_logger().info("ready to receive real images!")
+        self.get_logger().info("Warmup completed! Ready to receive real images!")
 
 
     def handle_image_classification_srv(self, request, response):

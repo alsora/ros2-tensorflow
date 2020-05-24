@@ -21,4 +21,4 @@ class TensorflowNode(Node):
 
         self.session = tf.compat.v1.Session(graph=self.graph)
 
-        self.get_logger().info("load model completed!")
+        self.get_logger().info("Load model completed!")

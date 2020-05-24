@@ -8,7 +8,7 @@ import numpy as np
 import cv2
 
 TENSORFLOW_DIR = os.path.dirname(tf.__file__)
-TENSORFLOW_RESEARCH_DIR =  os.path.join(TENSORFLOW_DIR, 'models/research')
+TENSORFLOW_RESEARCH_DIR = os.path.join(TENSORFLOW_DIR, 'models/research')
 TENSORFLOW_OBJECT_DETECTION_DIR = os.path.join(TENSORFLOW_RESEARCH_DIR, 'object_detection')
 
 sys.path.append(TENSORFLOW_RESEARCH_DIR) 
@@ -17,8 +17,6 @@ sys.path.append(TENSORFLOW_OBJECT_DETECTION_DIR)
 from object_detection.utils import label_map_util
 from object_detection.utils import visualization_utils as vis_util
 
-import rclpy
-from rclpy.node import Node
 from sensor_msgs.msg import Image as ImageMsg
 from tf_interfaces.srv import ImageDetection as ImageDetectionSrv
 from ros2_tensorflow.node.tensorflow_node import TensorflowNode
@@ -87,7 +85,7 @@ class DetectionNode(TensorflowNode):
                 feed_dict={self.image_tensor: image_np_expanded})
 
         elapsed_time = datetime.now() - start_time
-        self.get_logger().info("image detection took: %r milliseconds" % (elapsed_time.total_seconds() * 1000))
+        self.get_logger().debug("Image detection took: %r milliseconds" % (elapsed_time.total_seconds() * 1000))
 
         return boxes, scores, classes, num
 
@@ -98,8 +96,7 @@ class DetectionNode(TensorflowNode):
 
         self.detect(image_np)
 
-        self.get_logger().info("warmup completed!")
-        self.get_logger().info("ready to receive real images!")
+        self.get_logger().info("Warmup completed! Ready to receive real images!")
 
 
     def publish_detection_results(self, image_np, boxes, scores, classes):
