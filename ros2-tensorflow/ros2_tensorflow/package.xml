@@ -11,8 +11,10 @@
 
   <license>Apache License 2.0</license>
 
-  <depend>libopencv-dev</depend>
-  <depend>tensorflow</depend>
+  <exec_depend>libopencv-dev</exec_depend>
+  <exec_depend>python-tensorflow-pip</exec_depend>
+
+  <exec_depend>rclpy</exec_depend>
 
   <test_depend>ament_copyright</test_depend>
   <test_depend>ament_flake8</test_depend>
