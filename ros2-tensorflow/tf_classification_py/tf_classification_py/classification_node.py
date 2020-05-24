@@ -1,7 +1,6 @@
 import tensorflow as tf
 import os
 import numpy as np
-from datetime import datetime
 
 from tf_interfaces.srv import ImageClassification as ImageClassificationSrv
 from ros2_tensorflow.node.tensorflow_node import TensorflowNode
@@ -36,14 +35,14 @@ class ClassificationNode(TensorflowNode):
 
 
     def classify(self, image_np):
-        start_time = datetime.now()
+        start_time = self.get_clock().now()
 
         predictions = self.session.run(
                 self.softmax_tensor,
                 feed_dict={self.image_tensor: image_np})
 
-        elapsed_time = datetime.now() - start_time
-        self.get_logger().debug("Image classification took: %r milliseconds" % (elapsed_time.total_seconds() * 1000))
+        elapsed_time = self.get_clock().now() - start_time
+        self.get_logger().debug("Image classification took: %r milliseconds" % (elapsed_time.nanoseconds / 1000000))
 
         return predictions
 

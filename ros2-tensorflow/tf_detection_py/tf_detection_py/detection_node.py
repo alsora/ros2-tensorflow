@@ -1,6 +1,5 @@
 import os
 import sys
-from datetime import datetime
 
 import tensorflow as tf
 import numpy as np
@@ -74,7 +73,7 @@ class DetectionNode(TensorflowNode):
 
 
     def detect(self, image_np):
-        start_time = datetime.now()
+        start_time = self.get_clock().now()
 
         # Expand dimensions since the model expects images to have shape: [1, None, None, 3]
         image_np_expanded = np.expand_dims(image_np, axis=0)
@@ -84,8 +83,8 @@ class DetectionNode(TensorflowNode):
                 [self.detection_boxes, self.detection_scores, self.detection_classes, self.num_detections],
                 feed_dict={self.image_tensor: image_np_expanded})
 
-        elapsed_time = datetime.now() - start_time
-        self.get_logger().debug("Image detection took: %r milliseconds" % (elapsed_time.total_seconds() * 1000))
+        elapsed_time = self.get_clock().now() - start_time
+        self.get_logger().debug("Image detection took: %r milliseconds" % (elapsed_time.nanoseconds / 1000000))
 
         return boxes, scores, classes, num
 
