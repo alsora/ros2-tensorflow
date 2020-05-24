@@ -7,9 +7,9 @@
     Python nodes for image classification tasks using Tensorflow.
   </description>
   <maintainer email="alberto.soragna@gmail.com">Alberto Soragna</maintainer>
-  <license>Apache License 2.0</license>
-
   <author email="alberto.soragna@gmail.com">Alberto Soragna</author>
+
+  <license>Apache License 2.0</license>
 
   <depend>libopencv-dev</depend>
   <depend>tensorflow</depend>

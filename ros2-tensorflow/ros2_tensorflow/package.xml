@@ -3,10 +3,13 @@
 <package format="3">
   <name>ros2_tensorflow</name>
   <version>0.0.2</version>
-  <description>Utilities for working with ROS 2 and Tensorflow</description>
+  <description>
+    Utilities for working with ROS 2 and Tensorflow
+  </description>
   <maintainer email="alberto.soragna@gmail.com">Alberto Soragna</maintainer>
-  <license>MIT</license>
-  <author>Alberto Soragna</author>
+  <author email="alberto.soragna@gmail.com">Alberto Soragna</author>
+
+  <license>Apache License 2.0</license>
 
   <depend>libopencv-dev</depend>
   <depend>tensorflow</depend>
