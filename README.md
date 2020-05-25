@@ -24,7 +24,7 @@ To use the Dockerfile:
     $ bash build.sh
     $ bash run.sh
 
-#### Manual build
+#### Package build
 
 This section describes how to build `ros2-tensorflow` package.
 

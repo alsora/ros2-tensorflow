@@ -12,7 +12,7 @@ setup(
             ['resource/' + package_name]),
         ('share/' + package_name, ['package.xml']),
     ],
-    install_requires=['setuptools', 'numpy', 'python-opencv'],
+    install_requires=['setuptools'],
     author='Alberto Soragna',
     author_email='alberto.soragna@gmail.com',
     maintainer='Alberto Soragna',
@@ -26,6 +26,7 @@ setup(
     ],
     description='Utilities for working with ROS 2 and Tensorflow',
     license='Apache License, Version 2.0',
+    tests_require=['pytest'],
     test_suite='test',
     entry_points={
         'console_scripts': [
