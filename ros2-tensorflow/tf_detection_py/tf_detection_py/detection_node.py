@@ -18,7 +18,6 @@ from sensor_msgs.msg import Image as ImageMsg
 from tf_interfaces.srv import ImageDetection as ImageDetectionSrv
 from ros2_tensorflow.node.tensorflow_node import TensorflowNode
 from ros2_tensorflow.utils import img_conversion
-#import cv_bridge
 
 MODEL_NAME = 'ssd_mobilenet_v1_coco_2017_11_17'
 
@@ -26,13 +25,6 @@ MODEL_NAME = 'ssd_mobilenet_v1_coco_2017_11_17'
 PATH_TO_FROZEN_MODEL = os.path.join(os.path.join(TENSORFLOW_OBJECT_DETECTION_DIR, MODEL_NAME), 'frozen_inference_graph.pb')
 # List of the strings that is used to add correct label for each box.
 PATH_TO_LABELS = os.path.join(TENSORFLOW_OBJECT_DETECTION_DIR,"data/mscoco_label_map.pbtxt")
-
-NUM_CLASSES = 90
-MIN_SCORE_THRESHOLD = 0.5
-
-label_map = label_map_util.load_labelmap(PATH_TO_LABELS)
-categories = label_map_util.convert_label_map_to_categories(label_map, max_num_classes=NUM_CLASSES, use_display_name=True)
-category_index = label_map_util.create_category_index(categories)
 
 class DetectionNode(TensorflowNode):
 
@@ -47,6 +39,8 @@ class DetectionNode(TensorflowNode):
         
 
     def startup(self):
+        self.category_index = label_map_util.create_category_index_from_labelmap(PATH_TO_LABELS, use_display_name=True)
+
         super().load_model(PATH_TO_FROZEN_MODEL)
 
         # Definite input and output Tensors for detection_graph
@@ -103,7 +97,7 @@ class DetectionNode(TensorflowNode):
                 np.squeeze(boxes),
                 np.squeeze(classes).astype(np.int32),
                 np.squeeze(scores),
-                category_index,
+                self.category_index,
                 use_normalized_coordinates=True,
                 line_thickness=8)
 
@@ -133,6 +127,7 @@ class DetectionNode(TensorflowNode):
         scores = scores[0]
         num = num[0]
 
+        MIN_SCORE_THRESHOLD = 0.5
         response.detections = []
         for i in range(int(num)):
             if scores[i] < MIN_SCORE_THRESHOLD:
