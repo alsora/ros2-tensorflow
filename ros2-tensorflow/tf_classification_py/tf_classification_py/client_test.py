@@ -20,7 +20,8 @@ def main(args=None):
     future = client.call_async(req)
     rclpy.spin_until_future_complete(node, future)
     if future.result() is not None:
-        node.get_logger().info('Result of classification: %d' % future.result().classification)
+        classification = future.result().classification
+        node.get_logger().info('Result of classification:\n' + str(classification.results))
     else:
         node.get_logger().error('Exception while calling service: %r' % future.exception())
 

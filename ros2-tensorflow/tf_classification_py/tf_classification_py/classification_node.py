@@ -2,6 +2,7 @@ import tensorflow as tf
 import os
 import numpy as np
 
+from vision_msgs.msg import ObjectHypothesis as ObjectHypothesisMsg
 from tf_interfaces.srv import ImageClassification as ImageClassificationSrv
 from ros2_tensorflow.node.tensorflow_node import TensorflowNode
 from ros2_tensorflow.utils import img_conversion as img_utils
@@ -69,6 +70,11 @@ class ClassificationNode(TensorflowNode):
         k = 5
         top_k_predictions = predictions.argsort()[-k:][::-1]
 
-        response.classification = int(top_k_predictions[0])
+        response.classification.header.stamp = self.get_clock().now().to_msg()
+        response.classification.results = []
+        for prediction in top_k_predictions:
+            hypotesis = ObjectHypothesisMsg()
+            hypotesis.id = str(prediction)
+            response.classification.results.append(hypotesis)
 
         return response

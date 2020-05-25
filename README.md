@@ -13,6 +13,7 @@ In order to build the `ros2-tensorflow` package, the following dependencies are 
  - [ROS2 Eloquent](https://index.ros.org/doc/ros2/Installation/)
  - [Tensorflow](https://www.tensorflow.org/install/)
  - [Tensorflow Object Detection Models](https://github.com/tensorflow/models/blob/master/research/object_detection/g3doc/installation.md)
+ - [Vision Msgs](https://github.com/Kukanani/vision_msgs)
 
 The provided Dockerfile contains an Ubuntu 18.04 environment with all the dependencies already installed.
 
