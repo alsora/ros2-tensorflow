@@ -54,9 +54,15 @@ Build and install the `ros2-tensorflow` package
 
 #### Image Detection Task
 
-Get a Tensorflow model for image detection ([mobilenet_v1](download.tensorflow.org/models/object_detection/ssd_mobilenet_v1_coco_2017_11_17.tar.gz)), uncompress it and place it inside the Tensorflow Models Object Detection directory at `/usr/local/lib/python3.6/dist-packages/tensorflow/models/research/object_detection`.
+Get a Tensorflow model for image detection from the [detection model zoo](https://github.com/tensorflow/models/blob/master/research/object_detection/g3doc/detection_model_zoo.md#coco-trained-models) uncompress it and place it inside the Tensorflow Models Object Detection directory at `/usr/local/lib/python3.6/dist-packages/tensorflow/models/research/object_detection`.
 
-**NOTE**:If you want to use a different model or you installed Tensorflow Models in a different place, make sure to edit the paths inside the nodes and build again the workspace.
+For example
+
+    $ cd /usr/local/lib/python3.6/dist-packages/tensorflow/models/research/object_detection
+    $ wget http://download.tensorflow.org/models/object_detection/ssd_mobilenet_v1_coco_2017_11_17.tar.gz
+    $ tar -xf ssd_mobilenet_v1_coco_2017_11_17.tar.gz
+
+**IMPORTANT**:If you want to use a different model or you installed Tensorflow Models in a different place, make sure to edit the paths inside the nodes and build again the workspace.
 
 Test the image detection service by running in separate terminals
 
@@ -72,9 +78,16 @@ Real time image detection using your laptop camera
 
 #### Image Classification Task
 
-Get a Tensorflow model for image classification ([inception network](http://download.tensorflow.org/models/image/imagenet/inception-2015-12-05.tgz)), uncompress it and place it inside the Tensorflow Models Imagenet directory at `/usr/local/lib/python3.6/dist-packages/tensorflow/models/tutorial/image/imagenet`.
+Get a Tensorflow model for image classification.
 
-**NOTE**:If you want to use a different model or you installed Tensorflow Models in a different place, make sure to edit the paths inside the nodes and build again the workspace.
+For example
+
+    $ mkdir -p /usr/local/lib/python3.6/dist-packages/tensorflow/models/tutorial/image/imagenet
+    $ cd /usr/local/lib/python3.6/dist-packages/tensorflow/models/tutorial/image/imagenet
+    $ wget http://download.tensorflow.org/models/image/imagenet/inception-2015-12-05.tgz
+    $ tar -xf inception-2015-12-05.tgz
+
+**IMPORTANT**:If you want to use a different model or you installed Tensorflow Models in a different place, make sure to edit the paths inside the nodes and build again the workspace.
 
 Test the image classification service by running in separate terminals
 
