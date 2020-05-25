@@ -4,8 +4,6 @@ import sys
 import tensorflow as tf
 import numpy as np
 
-import cv2
-
 TENSORFLOW_DIR = os.path.dirname(tf.__file__)
 TENSORFLOW_RESEARCH_DIR = os.path.join(TENSORFLOW_DIR, 'models/research')
 TENSORFLOW_OBJECT_DETECTION_DIR = os.path.join(TENSORFLOW_RESEARCH_DIR, 'object_detection')

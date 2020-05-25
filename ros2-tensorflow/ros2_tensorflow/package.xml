@@ -11,7 +11,7 @@
 
   <license>Apache License 2.0</license>
 
-  <exec_depend>libopencv-dev</exec_depend>
+  <exec_depend>python3-opencv</exec_depend>
   <exec_depend>python-tensorflow-pip</exec_depend>
 
   <exec_depend>rclpy</exec_depend>
