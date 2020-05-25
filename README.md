@@ -7,20 +7,25 @@ The output can be directly visualized through Rviz
 
 ## Requirements
 
+In order to build the `ros2-tensorflow` package, the following dependencies are required
+
+ - [OpenCV Python](https://pypi.org/project/opencv-python/)
  - [ROS2 Eloquent](https://index.ros.org/doc/ros2/Installation/)
  - [Tensorflow](https://www.tensorflow.org/install/)
- - [Tensorflow Models](https://github.com/tensorflow/models/blob/master/research/object_detection/g3doc/installation.md)
- - [OpenCV3](https://docs.opencv.org/3.0-beta/doc/tutorials/introduction/linux_install/linux_install.html)
+ - [Tensorflow Object Detection Models](https://github.com/tensorflow/models/blob/master/research/object_detection/g3doc/installation.md)
 
 The provided Dockerfile contains an Ubuntu 18.04 environment with all the dependencies already installed.
 
 To use the Dockerfile:
 
-    $ cd docker
+    $ git clone https://github.com/alsora/ros2-tensorflow.git
+    $ cd ros2-tensorflow/docker
     $ bash build.sh
     $ bash run.sh
 
-## Build 
+#### Manual build
+
+This section describes how to build `ros2-tensorflow` package.
 
 Get the source code
 
@@ -28,16 +33,20 @@ Get the source code
 
 Create a ROS2 workspace
 
-    $ mkdir -p ws/src
+    $ mkdir -p $HOME/tf_ws/src
 
 Add sources to workspace
 
-    $ cd ws/src
-    $ ln -s $HOME/ros2-tensorflow/src/* .
+    $ cd $HOME/tf_ws/src
+    $ ln -s $HOME/ros2-tensorflow/ros2-tensorflow .
 
-Build and source the workspace
+Install dependencies using rosdep
 
-    $ cd ..
+    $ cd $HOME/tf_ws
+    $ rosdep install --from-paths src --ignore-src --rosdistro eloquent -y
+
+Build and install the `ros2-tensorflow` package
+
     $ colcon build
     $ source install/local_setup.sh
 

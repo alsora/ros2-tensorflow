@@ -86,30 +86,11 @@ RUN apt-get install -y \
 # install cycloneDDS RMW implementation
 RUN apt-get install -y ros-eloquent-rmw-cyclonedds-cpp
 
-##### OPENCV3
+##### OPENCV
 
-RUN apt-get install -y software-properties-common
-RUN add-apt-repository "deb http://security.ubuntu.com/ubuntu xenial-security main"
+RUN pip install opencv-contrib-python
 
-RUN apt-get update && apt-get install -y build-essential cmake git libgtk2.0-dev pkg-config libavcodec-dev libavformat-dev libswscale-dev python-dev python-numpy libtbb2 libtbb-dev libjpeg-dev libpng-dev libtiff-dev libjasper-dev libjasper1 libdc1394-22-dev
-
-RUN wget -O $HOME/opencv.zip https://github.com/opencv/opencv/archive/3.4.4.zip -q --show-progress --progress=bar:force 2>&1
-RUN wget -O $HOME/opencv_contrib.zip https://github.com/opencv/opencv_contrib/archive/3.4.4.zip -q --show-progress --progress=bar:force 2>&1
-
-RUN unzip -q $HOME/opencv.zip
-RUN unzip -q $HOME/opencv_contrib.zip
-RUN mv $HOME/opencv-3.4.4 $HOME/opencv
-RUN mv $HOME/opencv_contrib-3.4.4 $HOME/opencv_contrib
-RUN rm $HOME/opencv.zip $HOME/opencv_contrib.zip
-
-RUN mkdir $HOME/opencv/build
-WORKDIR $HOME/opencv/build
-COPY scripts/build_opencv.sh $HOME/scripts/build_opencv.sh
-RUN chmod +x $HOME/scripts/build_opencv.sh
-RUN /bin/bash -c 'source $HOME/.bashrc; \
-  $HOME/scripts/build_opencv.sh'
-
-#### TENSORFLOW SETUP
+#### TENSORFLOW
 
 WORKDIR $HOME
 
@@ -117,15 +98,9 @@ WORKDIR $HOME
 #RUN export LD_LIBRARY_PATH=${LD_LIBRARY_PATH:+${LD_LIBRARY_PATH}:}/usr/local/cuda/extras/CUPTI/lib64
 RUN pip install tensorflow
 
-# general python visualization packages
-RUN apt-get install -y \
-  python3-tk \
-  libgtk2.0-dev
-RUN pip install matplotlib opencv-python
-
-#### TENSORFLOW OBJECT DETECTION
-
-# tensorflow object detection dependencies
+# tensorflow object detection dependencies from:
+# https://tensorflow-object-detection-api-tutorial.readthedocs.io/en/latest/install.html#install-prerequisites
+# https://github.com/tensorflow/models/blob/master/research/object_detection/g3doc/installation.md
 RUN apt-get install -y \
   protobuf-compiler \
   python-pil \
@@ -134,25 +109,26 @@ RUN apt-get install -y \
 RUN pip install \
   Cython \
   contextlib2 \
-  jupyter
+  jupyter \
+  matplotlib
 
-# get models
+# get tensorflow models repository
+# currently object detection is part of research models that are not available on releases, so we use master
+# TODO: check v2.20 WIP object detection https://github.com/tensorflow/models/tree/v2.2.0/official/vision/detection
 RUN git clone https://github.com/tensorflow/models.git /usr/local/lib/python3.6/dist-packages/tensorflow/models
 WORKDIR /usr/local/lib/python3.6/dist-packages/tensorflow/models
-COPY scripts/label_map_util.patch /usr/local/lib/python3.6/dist-packages/tensorflow/models/label_map_util.patch
-RUN git apply label_map_util.patch
 
-# build coco api
+# optional install COCO API for COCO metrics
 RUN git clone https://github.com/cocodataset/cocoapi.git $HOME/cocoapi
 WORKDIR $HOME/cocoapi/PythonAPI
 RUN rm Makefile
 COPY scripts/coco/Makefile $HOME/cocoapi/PythonAPI/Makefile
 RUN make
 RUN cp -r pycocotools /usr/local/lib/python3.6/dist-packages/tensorflow/models/research
+
+# protobuf compilation
 WORKDIR /usr/local/lib/python3.6/dist-packages/tensorflow/models/research
-RUN wget -O protobuf.zip https://github.com/google/protobuf/releases/download/v3.0.0/protoc-3.0.0-linux-x86_64.zip -q --show-progress --progress=bar:force 2>&1
-RUN unzip -q protobuf.zip
-RUN /bin/bash -c './bin/protoc object_detection/protos/*.proto --python_out=.'
+RUN protoc object_detection/protos/*.proto --python_out=.
 
 ##### NETWORK MODELS
 
@@ -169,11 +145,24 @@ RUN tar -xf inception-2015-12-05.tgz -C inception-2015-12-05
 
 ##### ROS2 VISION OPEN CV
 
-RUN apt-get install -y libcanberra-gtk-module libboost-all-dev
+## the vision open cv package is currently not used due to bugs in its ROS 2 version
+#RUN apt-get update && apt-get install -y libcanberra-gtk-module libboost-all-dev
+#RUN mkdir -p $HOME/ros2_vision_opencv_ws/src
+#WORKDIR $HOME/ros2_vision_opencv_ws/src
+#RUN git clone -b ros2 https://github.com/ros-perception/vision_opencv.git
 
-RUN mkdir -p $HOME/ros2_vision_opencv_ws/src
-WORKDIR $HOME/ros2_vision_opencv_ws/src
-RUN git clone -b ros2 https://github.com/ros-perception/vision_opencv.git
+##### INSTALL ROS 2 TENSORFLOW
+
+WORKDIR $HOME
+
+RUN git clone https://github.com/alsora/ros2-tensorflow $HOME/ros2-tensorflow
+RUN mkdir -p $HOME/tf_ws/src
+WORKDIR $HOME/tf_ws/src
+RUN ln -s $HOME/ros2-tensorflow/ros2-tensorflow .
+WORKDIR $HOME/tf_ws
+RUN rosdep install --from-paths src --ignore-src --rosdistro eloquent -y
+RUN /bin/bash -c 'source /opt/ros/eloquent/setup.sh; \
+  colcon build'
 
 #### SET ENVIRONMENT
 
@@ -181,7 +170,8 @@ WORKDIR $HOME
 
 RUN echo ' \n\
 echo "Sourcing ROS2 packages..." \n\
-source /opt/ros/eloquent/setup.sh' >> $HOME/.bashrc
+source /opt/ros/eloquent/setup.sh \n\
+source $HOME/tf_ws/install/local_setup.sh' >> $HOME/.bashrc
 
 RUN echo ' \n\
 export PYTHONPATH=$PYTHONPATH:/usr/local/lib/python3.6/dist-packages/tensorflow/models/research:/usr/local/lib/python3.6/dist-packages/tensorflow/models/research/slim' >> $HOME/.bashrc
