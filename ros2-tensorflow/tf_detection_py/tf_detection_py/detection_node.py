@@ -17,7 +17,8 @@ from object_detection.utils import visualization_utils as vis_util
 from sensor_msgs.msg import Image as ImageMsg
 from tf_interfaces.srv import ImageDetection as ImageDetectionSrv
 from ros2_tensorflow.node.tensorflow_node import TensorflowNode
-from ros2_tensorflow.utils import img_conversion
+from ros2_tensorflow.utils import img_conversion as img_utils
+from ros2_tensorflow.utils import load_models as load_utils
 
 MODEL_NAME = 'ssd_mobilenet_v1_coco_2017_11_17'
 
@@ -41,7 +42,9 @@ class DetectionNode(TensorflowNode):
     def startup(self):
         self.category_index = label_map_util.create_category_index_from_labelmap(PATH_TO_LABELS, use_display_name=True)
 
-        super().load_model(PATH_TO_FROZEN_MODEL)
+        self.graph, self.session = load_utils.load_frozen_model(PATH_TO_FROZEN_MODEL)
+
+        self.get_logger().info("Load model completed!")
 
         # Definite input and output Tensors for detection_graph
         self.image_tensor = self.graph.get_tensor_by_name('image_tensor:0')
@@ -115,7 +118,7 @@ class DetectionNode(TensorflowNode):
 
     def handle_image_detection_srv(self, request, response):
 
-        image_np = img_conversion.image_msg_to_image_np(request.image)
+        image_np = img_utils.image_msg_to_image_np(request.image)
 
         boxes, scores, classes, num = self.detect(image_np)
 
@@ -139,7 +142,7 @@ class DetectionNode(TensorflowNode):
 
     def image_detection_callback(self, img_msg):
 
-        image_np = img_conversion.image_msg_to_image_np(img_msg)
+        image_np = img_utils.image_msg_to_image_np(img_msg)
 
         boxes, scores, classes, num = self.detect(image_np)
 

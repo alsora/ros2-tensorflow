@@ -4,7 +4,8 @@ import numpy as np
 
 from tf_interfaces.srv import ImageClassification as ImageClassificationSrv
 from ros2_tensorflow.node.tensorflow_node import TensorflowNode
-from ros2_tensorflow.utils import img_conversion
+from ros2_tensorflow.utils import img_conversion as img_utils
+from ros2_tensorflow.utils import load_models as load_utils
 
 TENSORFLOW_DIR = os.path.dirname(tf.__file__)
 TENSORFLOW_IMAGENET_DIR = os.path.join(TENSORFLOW_DIR, 'models/tutorial/image/imagenet')
@@ -21,7 +22,9 @@ class ClassificationNode(TensorflowNode):
         
 
     def startup(self):
-        super().load_model(PATH_TO_FROZEN_MODEL)
+        self.graph, self.session = load_utils.load_frozen_model(PATH_TO_FROZEN_MODEL)
+
+        self.get_logger().info("Load model completed!")
 
         # Definite input and output Tensors for classification_graph
         self.image_tensor = self.graph.get_tensor_by_name('DecodeJpeg:0')
@@ -58,7 +61,7 @@ class ClassificationNode(TensorflowNode):
 
     def handle_image_classification_srv(self, request, response):
 
-        image_np = img_conversion.image_msg_to_image_np(request.image)
+        image_np = img_utils.image_msg_to_image_np(request.image)
 
         predictions = self.classify(image_np)
 
