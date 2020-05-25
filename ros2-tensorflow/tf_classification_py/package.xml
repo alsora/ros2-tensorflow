@@ -15,10 +15,10 @@
 
   <exec_depend>rclpy</exec_depend>
   <exec_depend>sensor_msgs</exec_depend>
+  <exec_depend>vision_msgs</exec_depend>
 
   <exec_depend>tf_interfaces</exec_depend>
   <exec_depend>ros2_tensorflow</exec_depend>
-  <exec_depend>vision_msgs</exec_depend>
 
   <export>
     <build_type>ament_python</build_type>

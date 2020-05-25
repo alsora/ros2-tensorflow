@@ -15,6 +15,7 @@ from object_detection.utils import label_map_util
 from object_detection.utils import visualization_utils as vis_util
 
 from sensor_msgs.msg import Image as ImageMsg
+from vision_msgs.msg import Detection2DArray, Detection2D, ObjectHypothesisWithPose
 from tf_interfaces.srv import ImageDetection as ImageDetectionSrv
 from ros2_tensorflow.node.tensorflow_node import TensorflowNode
 from ros2_tensorflow.utils import img_conversion as img_utils
@@ -29,12 +30,14 @@ PATH_TO_LABELS = os.path.join(TENSORFLOW_OBJECT_DETECTION_DIR,"data/mscoco_label
 
 class DetectionNode(TensorflowNode):
 
-    def __init__(self, node_name, publish_bbox = True):
+    def __init__(self, node_name, republish_image = True):
         super().__init__(node_name)
 
-        self.publish_bbox = publish_bbox
-        if (self.publish_bbox):
-            self.pub = self.create_publisher(ImageMsg, 'output_image', 10)
+        self.MIN_SCORE_THRESHOLD = 0.5
+
+        self.republish_image = republish_image
+        if (self.republish_image):
+            self.image_pub = self.create_publisher(ImageMsg, 'output_image', 10)
 
         self.startup()
         
@@ -60,11 +63,12 @@ class DetectionNode(TensorflowNode):
         
 
     def create_detection_server(self, topic_name):
-        self.srv = self.create_service(ImageDetectionSrv, topic_name, self.handle_image_detection_srv)
+        self.detection_server = self.create_service(ImageDetectionSrv, topic_name, self.handle_image_detection_srv)
 
 
     def create_detection_subscription(self, topic_name):
-        self.sub = self.create_subscription(ImageMsg, topic_name, self.image_detection_callback, 10)
+        self.image_sub = self.create_subscription(ImageMsg, topic_name, self.image_detection_callback, 10)
+        self.detection_pub = self.create_publisher(Detection2DArray, 'detections', 10)
 
 
     def detect(self, image_np):
@@ -93,7 +97,7 @@ class DetectionNode(TensorflowNode):
         self.get_logger().info("Warmup completed! Ready to receive real images!")
 
 
-    def publish_detection_results(self, image_np, boxes, scores, classes):
+    def create_image_msg_with_detections(self, image_np, boxes, scores, classes):
         # Visualization of the results of a detection.
         vis_util.visualize_boxes_and_labels_on_image_array(
                 image_np,
@@ -102,6 +106,7 @@ class DetectionNode(TensorflowNode):
                 np.squeeze(scores),
                 self.category_index,
                 use_normalized_coordinates=True,
+                min_score_thresh=self.MIN_SCORE_THRESHOLD,
                 line_thickness=8)
 
         img_msg = ImageMsg()
@@ -113,7 +118,46 @@ class DetectionNode(TensorflowNode):
         img_msg.step = len(img_msg.data) // img_msg.height
         img_msg.header.frame_id = "map"
 
-        self.pub.publish(img_msg)
+        return img_msg
+
+
+    def create_detections_msg(self, image_np, boxes, scores, classes, num):
+        img_height = image_np.shape[0]
+        img_width = image_np.shape[1]
+
+        # remove additional dimension
+        boxes = boxes[0]
+        classes = classes[0]
+        num = num[0]
+        scores = scores[0]
+
+        detections = Detection2DArray()
+
+        detections.header.stamp = self.get_clock().now().to_msg()
+        detections.detections = []
+        for i in range(int(num)):
+            if scores[i] < self.MIN_SCORE_THRESHOLD:
+                break
+
+            det = Detection2D()
+            det.header = detections.header
+            det.results = []
+            detected_object = ObjectHypothesisWithPose()
+            detected_object.id = str(classes[i])
+            detected_object.score = float(scores[i])
+            det.results.append(detected_object)
+
+            # box is min y, min x, max y, max x
+            # in normalized coordinates
+            box = boxes[i]
+            det.bbox.size_y = (box[2] - box[0]) * img_height
+            det.bbox.size_x = (box[3] - box[1]) * img_width
+            det.bbox.center.x = (box[1] + box [3]) * img_height / 2
+            det.bbox.center.y = (box[0] + box[2]) * img_width / 2
+
+            detections.detections.append(det)
+
+        return detections
 
 
     def handle_image_detection_srv(self, request, response):
@@ -122,20 +166,11 @@ class DetectionNode(TensorflowNode):
 
         boxes, scores, classes, num = self.detect(image_np)
 
-        if (self.publish_bbox):
-            self.publish_detection_results(image_np, boxes, scores, classes)
+        if (self.republish_image):
+            img_msg = self.create_image_msg_with_detections(image_np, boxes, scores, classes)
+            self.image_pub.publish(img_msg)
 
-        # remove additional dimension
-        classes = classes[0]
-        scores = scores[0]
-        num = num[0]
-
-        MIN_SCORE_THRESHOLD = 0.5
-        response.detections = []
-        for i in range(int(num)):
-            if scores[i] < MIN_SCORE_THRESHOLD:
-                break
-            response.detections.append(int(classes[i]))
+        response.detections = self.create_detections_msg(image_np, boxes, scores, classes, num)
 
         return response
 
@@ -146,5 +181,10 @@ class DetectionNode(TensorflowNode):
 
         boxes, scores, classes, num = self.detect(image_np)
 
-        if (self.publish_bbox):
-            self.publish_detection_results(image_np, boxes, scores, classes)
+        if (self.republish_image):
+            img_msg = self.create_image_msg_with_detections(image_np, boxes, scores, classes)
+            self.image_pub.publish(img_msg)
+
+        detections_msg = self.create_detections_msg(image_np, boxes, scores, classes, num)
+        self.detection_pub.publish(detections_msg)
+
