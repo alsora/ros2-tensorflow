@@ -153,8 +153,8 @@ class DetectionNode(TensorflowNode):
             det.header = detections.header
             det.results = []
             detected_object = ObjectHypothesisWithPose()
-            detected_object.id = str(classes[i])
-            detected_object.score = float(scores[i])
+            detected_object.id = int(classes[i].item())
+            detected_object.score = scores[i].item()
             det.results.append(detected_object)
 
             # box is min y, min x, max y, max x

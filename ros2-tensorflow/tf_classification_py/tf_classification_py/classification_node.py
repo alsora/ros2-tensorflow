@@ -77,8 +77,10 @@ class ClassificationNode(TensorflowNode):
 
         image_np = img_utils.image_msg_to_image_np(request.image)
 
+        # This variable contains the softmax scores
         predictions = self.classify(image_np)
 
+        # Get top indices from softmax
         predictions = np.squeeze(predictions)
         k = 5
         top_k_predictions = predictions.argsort()[-k:][::-1]
@@ -87,7 +89,8 @@ class ClassificationNode(TensorflowNode):
         response.classification.results = []
         for prediction in top_k_predictions:
             hypotesis = ObjectHypothesisMsg()
-            hypotesis.id = str(prediction)
+            hypotesis.id = prediction.item()
+            hypotesis.score = predictions[prediction].item()
             response.classification.results.append(hypotesis)
 
         return response
