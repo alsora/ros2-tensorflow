@@ -116,7 +116,10 @@ RUN pip install \
 # currently object detection is part of research models that are not available on releases, so we use master
 # TODO: check v2.20 WIP object detection https://github.com/tensorflow/models/tree/v2.2.0/official/vision/detection
 RUN git clone https://github.com/tensorflow/models.git /usr/local/lib/python3.6/dist-packages/tensorflow/models
-WORKDIR /usr/local/lib/python3.6/dist-packages/tensorflow/models
+
+# protobuf compilation
+WORKDIR /usr/local/lib/python3.6/dist-packages/tensorflow/models/research
+RUN protoc object_detection/protos/*.proto --python_out=.
 
 # optional install COCO API for COCO metrics
 RUN git clone https://github.com/cocodataset/cocoapi.git $HOME/cocoapi
@@ -125,10 +128,6 @@ RUN rm Makefile
 COPY scripts/coco/Makefile $HOME/cocoapi/PythonAPI/Makefile
 RUN make
 RUN cp -r pycocotools /usr/local/lib/python3.6/dist-packages/tensorflow/models/research
-
-# protobuf compilation
-WORKDIR /usr/local/lib/python3.6/dist-packages/tensorflow/models/research
-RUN protoc object_detection/protos/*.proto --python_out=.
 
 ##### NETWORK MODELS
 
@@ -154,6 +153,8 @@ RUN tar -xf inception-2015-12-05.tgz -C inception-2015-12-05
 ##### INSTALL ROS 2 TENSORFLOW
 
 WORKDIR $HOME
+
+RUN rosdep update
 
 RUN git clone https://github.com/alsora/ros2-tensorflow $HOME/ros2-tensorflow
 RUN mkdir -p $HOME/tf_ws/src

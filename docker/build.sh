@@ -11,4 +11,5 @@ else
     CLEAN_CMD=""
 fi
 
-docker build -t $CLEAN_CMD $IMG_NAME .
+docker pull osrf/ros:eloquent-desktop
+docker build $CLEAN_CMD -t $IMG_NAME .

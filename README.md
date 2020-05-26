@@ -24,9 +24,9 @@ To use the Dockerfile:
     $ bash build.sh
     $ bash run.sh
 
-#### Package build
+## Build
 
-This section describes how to build `ros2-tensorflow` package.
+This section describes how to build the `ros2-tensorflow` package and the required depenencies in case you are not using the provided Dockerfile.
 
 Get the source code
 
@@ -45,6 +45,14 @@ Install dependencies using rosdep
 
     $ cd $HOME/tf_ws
     $ rosdep install --from-paths src --ignore-src --rosdistro eloquent -y
+
+Install the Tensorflow Object Detection Models
+
+    $ sudo apt-get install -y protobuf-compiler python-pil python-lxml python-tk
+    $ pip install --user Cython contextlib2 jupyter matplotlib
+    $ git clone https://github.com/tensorflow/models.git /usr/local/lib/python3.6/dist-packages/tensorflow/models
+    $ cd usr/local/lib/python3.6/dist-packages/tensorflow/models/research
+    $ protoc object_detection/protos/*.proto --python_out=.
 
 Build and install the `ros2-tensorflow` package
 
@@ -86,7 +94,8 @@ For example
     $ mkdir -p /usr/local/lib/python3.6/dist-packages/tensorflow/models/tutorial/image/imagenet
     $ cd /usr/local/lib/python3.6/dist-packages/tensorflow/models/tutorial/image/imagenet
     $ wget http://download.tensorflow.org/models/image/imagenet/inception-2015-12-05.tgz
-    $ tar -xf inception-2015-12-05.tgz
+    $ mkdir inception-2015-12-05
+    $ tar -xf inception-2015-12-05.tgz -C inception-2015-12-05
 
 **IMPORTANT**:If you want to use a different model or you installed Tensorflow Models in a different place, make sure to edit the paths inside the nodes and build again the workspace.
 
