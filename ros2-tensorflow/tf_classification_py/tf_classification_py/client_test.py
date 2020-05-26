@@ -15,8 +15,11 @@
 
 import rclpy
 
+from ros2_tensorflow.node.qos import qos_profile_vision_info
 from ros2_tensorflow.utils import img_conversion as img_utils
+
 from tf_interfaces.srv import ImageClassification as ImageClassificationSrv
+from vision_msgs.msg import VisionInfo as VisionInfoMsg
 
 IMG_PATH = '/root/ros2-tensorflow/data/dog.jpg'
 
@@ -27,6 +30,10 @@ def main(args=None):
     node = rclpy.create_node('client_test')
 
     client = node.create_client(ImageClassificationSrv, 'image_classification')
+
+    vision_info_callback = lambda info_msg : node.get_logger().info('received vision info %r' % info_msg)
+    info_subscription = node.create_subscription(VisionInfoMsg, 'vision_info', vision_info_callback, qos_profile=qos_profile_vision_info)
+
     while not client.wait_for_service(timeout_sec=1.0):
         node.get_logger().info('service not available, waiting again...')
 

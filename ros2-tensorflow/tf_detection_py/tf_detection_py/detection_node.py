@@ -29,13 +29,14 @@ sys.path.append(TENSORFLOW_OBJECT_DETECTION_DIR)
 from object_detection.utils import label_map_util
 from object_detection.utils import visualization_utils as vis_util
 
+from ros2_tensorflow.node.qos import qos_profile_vision_info
 from ros2_tensorflow.node.tensorflow_node import TensorflowNode
 from ros2_tensorflow.utils import img_conversion as img_utils
 from ros2_tensorflow.utils import load_models as load_utils
 
 from sensor_msgs.msg import Image as ImageMsg
 from tf_interfaces.srv import ImageDetection as ImageDetectionSrv
-from vision_msgs.msg import Detection2D, Detection2DArray, ObjectHypothesisWithPose
+from vision_msgs.msg import Detection2D, Detection2DArray, ObjectHypothesisWithPose, VisionInfo
 
 MODEL_NAME = 'ssd_mobilenet_v1_coco_2017_11_17'
 
@@ -52,6 +53,8 @@ class DetectionNode(TensorflowNode):
 
         self.MIN_SCORE_THRESHOLD = 0.5
 
+        self.vision_info_pub = self.create_publisher(VisionInfo, 'vision_info', qos_profile=qos_profile_vision_info)
+
         self.republish_image = republish_image
         if (self.republish_image):
             self.image_pub = self.create_publisher(ImageMsg, 'output_image', 10)
@@ -59,13 +62,14 @@ class DetectionNode(TensorflowNode):
         self.startup()
 
     def startup(self):
+        # Load labels
         self.category_index = label_map_util.create_category_index_from_labelmap(PATH_TO_LABELS, use_display_name=True)
 
+        # Load model
         self.graph, self.session = load_utils.load_frozen_model(PATH_TO_FROZEN_MODEL)
-
         self.get_logger().info('Load model completed!')
 
-        # Definite input and output Tensors for detection_graph
+        # Define input and output Tensors for detection_graph
         self.image_tensor = self.graph.get_tensor_by_name('image_tensor:0')
         # Each box represents a part of the image where a particular object was detected.
         self.detection_boxes = self.graph.get_tensor_by_name('detection_boxes:0')
@@ -74,6 +78,12 @@ class DetectionNode(TensorflowNode):
         self.detection_scores = self.graph.get_tensor_by_name('detection_scores:0')
         self.detection_classes = self.graph.get_tensor_by_name('detection_classes:0')
         self.num_detections = self.graph.get_tensor_by_name('num_detections:0')
+
+        # Publish vision info message (published only once with TRANSIENT LOCAL durability)
+        vision_info_msg = VisionInfo()
+        vision_info_msg.method = "TensorFlow object detection network, trained on mscoco"
+        vision_info_msg.database_location = PATH_TO_LABELS
+        self.vision_info_pub.publish(vision_info_msg)
 
         self.warmup()
 
