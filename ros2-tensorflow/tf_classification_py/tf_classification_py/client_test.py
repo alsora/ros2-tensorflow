@@ -3,7 +3,8 @@ import rclpy
 from ros2_tensorflow.utils import img_conversion as img_utils
 from tf_interfaces.srv import ImageClassification as ImageClassificationSrv
 
-IMG_PATH = "/root/ros2-tensorflow/data/dog.jpg"
+IMG_PATH = '/root/ros2-tensorflow/data/dog.jpg'
+
 
 def main(args=None):
     rclpy.init(args=args)

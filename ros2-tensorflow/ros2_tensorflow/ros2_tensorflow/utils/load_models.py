@@ -1,5 +1,6 @@
 import tensorflow as tf
 
+
 def load_frozen_model(frozen_model_path):
     graph = tf.Graph()
     with graph.as_default():

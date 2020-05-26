@@ -3,7 +3,8 @@ import rclpy
 from ros2_tensorflow.utils import img_conversion as img_utils
 from tf_interfaces.srv import ImageDetection as ImageDetectionSrv
 
-IMG_PATH = "/root/ros2-tensorflow/data/dogs.jpg"
+IMG_PATH = '/root/ros2-tensorflow/data/dogs.jpg'
+
 
 def main(args=None):
     rclpy.init(args=args)
@@ -23,7 +24,6 @@ def main(args=None):
         node.get_logger().info('Result of classification: %r' % future.result().detections)
     else:
         node.get_logger().error('Exception while calling service: %r' % future.exception())
-
 
     node.destroy_node()
     rclpy.shutdown()

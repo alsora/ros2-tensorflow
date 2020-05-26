@@ -1,12 +1,14 @@
-import tensorflow as tf
 import os
-import numpy as np
 
-from vision_msgs.msg import ObjectHypothesis as ObjectHypothesisMsg
-from tf_interfaces.srv import ImageClassification as ImageClassificationSrv
+import numpy as np
+import tensorflow as tf
+
 from ros2_tensorflow.node.tensorflow_node import TensorflowNode
 from ros2_tensorflow.utils import img_conversion as img_utils
 from ros2_tensorflow.utils import load_models as load_utils
+
+from tf_interfaces.srv import ImageClassification as ImageClassificationSrv
+from vision_msgs.msg import ObjectHypothesis as ObjectHypothesisMsg
 
 TENSORFLOW_DIR = os.path.dirname(tf.__file__)
 TENSORFLOW_IMAGENET_DIR = os.path.join(TENSORFLOW_DIR, 'models/tutorial/image/imagenet')
@@ -14,29 +16,27 @@ TENSORFLOW_IMAGENET_DIR = os.path.join(TENSORFLOW_DIR, 'models/tutorial/image/im
 MODEL_NAME = 'inception-2015-12-05'
 PATH_TO_FROZEN_MODEL = os.path.join(os.path.join(TENSORFLOW_IMAGENET_DIR, MODEL_NAME), 'classify_image_graph_def.pb')
 
+
 class ClassificationNode(TensorflowNode):
 
     def __init__(self, node_name):
         super().__init__(node_name)
 
         self.startup()
-        
 
     def startup(self):
         self.graph, self.session = load_utils.load_frozen_model(PATH_TO_FROZEN_MODEL)
 
-        self.get_logger().info("Load model completed!")
+        self.get_logger().info('Load model completed!')
 
         # Definite input and output Tensors for classification_graph
         self.image_tensor = self.graph.get_tensor_by_name('DecodeJpeg:0')
         self.softmax_tensor = self.graph.get_tensor_by_name('softmax:0')
 
         self.warmup()
-        
 
     def create_classification_server(self, topic_name):
         self.srv = self.create_service(ImageClassificationSrv, topic_name, self.handle_image_classification_srv)
-
 
     def classify(self, image_np):
         start_time = self.get_clock().now()
@@ -46,10 +46,9 @@ class ClassificationNode(TensorflowNode):
                 feed_dict={self.image_tensor: image_np})
 
         elapsed_time = self.get_clock().now() - start_time
-        self.get_logger().debug("Image classification took: %r milliseconds" % (elapsed_time.nanoseconds / 1000000))
+        self.get_logger().debug('Image classification took: %r milliseconds' % (elapsed_time.nanoseconds / 1000000))
 
         return predictions
-
 
     def warmup(self):
 
@@ -57,8 +56,7 @@ class ClassificationNode(TensorflowNode):
 
         self.classify(image_np)
 
-        self.get_logger().info("Warmup completed! Ready to receive real images!")
-
+        self.get_logger().info('Warmup completed! Ready to receive real images!')
 
     def handle_image_classification_srv(self, request, response):
 
