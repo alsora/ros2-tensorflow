@@ -156,10 +156,8 @@ WORKDIR $HOME
 
 RUN rosdep update
 
-RUN git clone https://github.com/alsora/ros2-tensorflow $HOME/ros2-tensorflow
 RUN mkdir -p $HOME/tf_ws/src
-WORKDIR $HOME/tf_ws/src
-RUN ln -s $HOME/ros2-tensorflow/ros2-tensorflow .
+RUN git clone https://github.com/alsora/ros2-tensorflow $HOME/tf_ws/src/ros2-tensorflow
 WORKDIR $HOME/tf_ws
 RUN rosdep install --from-paths src --ignore-src --rosdistro eloquent -y
 RUN /bin/bash -c 'source /opt/ros/eloquent/setup.sh; \
