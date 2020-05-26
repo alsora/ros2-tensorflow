@@ -173,7 +173,7 @@ source /opt/ros/eloquent/setup.sh \n\
 source $HOME/tf_ws/install/local_setup.sh' >> $HOME/.bashrc
 
 RUN echo ' \n\
-export PYTHONPATH=$PYTHONPATH:/usr/local/lib/python3.6/dist-packages/tensorflow/models/research:/usr/local/lib/python3.6/dist-packages/tensorflow/models/research/slim' >> $HOME/.bashrc
+export PYTHONPATH=$PYTHONPATH:/usr/local/lib/python3.6/dist-packages/tensorflow/models/research' >> $HOME/.bashrc
 
 RUN echo ' \n\
 alias python="python3"' >> $HOME/.bashrc

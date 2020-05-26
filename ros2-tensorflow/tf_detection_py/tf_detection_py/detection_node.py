@@ -17,14 +17,8 @@ import os
 import sys
 
 import numpy as np
+import object_detection
 import tensorflow as tf
-
-TENSORFLOW_DIR = os.path.dirname(tf.__file__)
-TENSORFLOW_RESEARCH_DIR = os.path.join(TENSORFLOW_DIR, 'models/research')
-TENSORFLOW_OBJECT_DETECTION_DIR = os.path.join(TENSORFLOW_RESEARCH_DIR, 'object_detection')
-
-sys.path.append(TENSORFLOW_RESEARCH_DIR)
-sys.path.append(TENSORFLOW_OBJECT_DETECTION_DIR)
 
 from object_detection.utils import label_map_util
 from object_detection.utils import visualization_utils as vis_util
@@ -37,6 +31,8 @@ from ros2_tensorflow.utils import load_models as load_utils
 from sensor_msgs.msg import Image as ImageMsg
 from tf_interfaces.srv import ImageDetection as ImageDetectionSrv
 from vision_msgs.msg import Detection2D, Detection2DArray, ObjectHypothesisWithPose, VisionInfo
+
+TENSORFLOW_OBJECT_DETECTION_DIR = os.path.dirname(object_detection.__file__)
 
 MODEL_NAME = 'ssd_mobilenet_v1_coco_2017_11_17'
 

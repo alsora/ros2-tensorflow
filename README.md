@@ -54,6 +54,10 @@ Install the Tensorflow Object Detection Models
     $ cd usr/local/lib/python3.6/dist-packages/tensorflow/models/research
     $ protoc object_detection/protos/*.proto --python_out=.
 
+Add the object detection libraries to the PYTHONPATH
+
+    $ echo 'export PYTHONPATH=$PYTHONPATH:/usr/local/lib/python3.6/dist-packages/tensorflow/models/research' >> $HOME/.bashrc
+
 Build and install the `ros2-tensorflow` package
 
     $ colcon build
