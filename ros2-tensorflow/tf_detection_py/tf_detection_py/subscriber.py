@@ -16,13 +16,14 @@
 import rclpy
 
 from tf_detection_py.detection_node import DetectionNode
+from tf_detection_py.models import COCO_MOBILENET
 
 
 def main(args=None):
 
     rclpy.init(args=args)
 
-    node = DetectionNode('detection_subscriber')
+    node = DetectionNode(COCO_MOBILENET, 'detection_subscriber')
     node.create_detection_subscription('image')
     rclpy.spin(node)
 

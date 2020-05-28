@@ -103,14 +103,14 @@ RUN pip install tensorflow
 # https://github.com/tensorflow/models/blob/master/research/object_detection/g3doc/installation.md
 RUN apt-get install -y \
   protobuf-compiler \
-  python-pil \
   python-lxml \
   python-tk
 RUN pip install \
   Cython \
   contextlib2 \
   jupyter \
-  matplotlib
+  matplotlib \
+  Pillow
 
 # get tensorflow models repository
 # currently object detection is part of research models that are not available on releases, so we use master
@@ -128,19 +128,6 @@ RUN rm Makefile
 COPY scripts/coco/Makefile $HOME/cocoapi/PythonAPI/Makefile
 RUN make
 RUN cp -r pycocotools /usr/local/lib/python3.6/dist-packages/tensorflow/models/research
-
-##### NETWORK MODELS
-
-# get mobilenet model for image detection
-WORKDIR /usr/local/lib/python3.6/dist-packages/tensorflow/models/research/object_detection
-RUN wget download.tensorflow.org/models/object_detection/ssd_mobilenet_v1_coco_2017_11_17.tar.gz -q --show-progress --progress=bar:force 2>&1
-RUN tar -xf ssd_mobilenet_v1_coco_2017_11_17.tar.gz
-
-# get inception model for image classification
-WORKDIR /usr/local/lib/python3.6/dist-packages/tensorflow/models/tutorial/image/imagenet
-RUN wget http://download.tensorflow.org/models/image/imagenet/inception-2015-12-05.tgz -q --show-progress --progress=bar:force 2>&1
-RUN mkdir inception-2015-12-05
-RUN tar -xf inception-2015-12-05.tgz -C inception-2015-12-05
 
 ##### ROS2 VISION OPEN CV
 

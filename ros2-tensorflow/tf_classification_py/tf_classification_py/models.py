@@ -13,17 +13,18 @@
 # limitations under the License.
 # ==============================================================================
 
+import os
+
 import tensorflow as tf
 
+from ros2_tensorflow.utils import models as models_utils
 
-def load_frozen_model(frozen_model_path):
-    graph = tf.Graph()
-    with graph.as_default():
-        od_graph_def = tf.compat.v1.GraphDef()
-        with tf.io.gfile.GFile(frozen_model_path, 'rb') as fid:
-            serialized_graph = fid.read()
-            od_graph_def.ParseFromString(serialized_graph)
-            tf.import_graph_def(od_graph_def, name='')
+TENSORFLOW_IMAGENET_DIR = os.path.join(os.path.dirname(tf.__file__), 'models/image/imagenet')
 
-    session = tf.compat.v1.Session(graph=graph)
-    return graph, session
+IMAGENET_INCEPTION = models_utils.TensorflowModel().from_url(
+    url='http://download.tensorflow.org/models/image/imagenet/inception-2015-12-05.tgz',
+    label_path=os.path.join(os.path.join(TENSORFLOW_IMAGENET_DIR, 'inception-2015-12-05'), 'imagenet_2012_challenge_label_map_proto.pbtxt'),
+    download_directory=TENSORFLOW_IMAGENET_DIR,
+    model_filename='classify_image_graph_def.pb',
+    save_load_format=models_utils.SaveLoadFormat.FROZEN_MODEL,
+    description='TensorFlow inception network for image classification, trained on imagenet')

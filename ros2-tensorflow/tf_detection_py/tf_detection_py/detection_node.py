@@ -13,11 +13,7 @@
 # limitations under the License.
 # ==============================================================================
 
-import os
-import sys
-
 import numpy as np
-import object_detection
 import tensorflow as tf
 
 from object_detection.utils import label_map_util
@@ -26,25 +22,15 @@ from object_detection.utils import visualization_utils as vis_util
 from ros2_tensorflow.node.qos import qos_profile_vision_info
 from ros2_tensorflow.node.tensorflow_node import TensorflowNode
 from ros2_tensorflow.utils import img_conversion as img_utils
-from ros2_tensorflow.utils import load_models as load_utils
 
 from sensor_msgs.msg import Image as ImageMsg
 from tf_interfaces.srv import ImageDetection as ImageDetectionSrv
 from vision_msgs.msg import Detection2D, Detection2DArray, ObjectHypothesisWithPose, VisionInfo
 
-TENSORFLOW_OBJECT_DETECTION_DIR = os.path.dirname(object_detection.__file__)
-
-MODEL_NAME = 'ssd_mobilenet_v1_coco_2017_11_17'
-
-# Path to frozen detection graph. This is the actual model that is used for the object detection.
-PATH_TO_FROZEN_MODEL = os.path.join(os.path.join(TENSORFLOW_OBJECT_DETECTION_DIR, MODEL_NAME), 'frozen_inference_graph.pb')
-# List of the strings that is used to add correct label for each box.
-PATH_TO_LABELS = os.path.join(TENSORFLOW_OBJECT_DETECTION_DIR, 'data/mscoco_label_map.pbtxt')
-
 
 class DetectionNode(TensorflowNode):
 
-    def __init__(self, node_name, republish_image=True):
+    def __init__(self, tf_model, node_name, republish_image=True):
         super().__init__(node_name)
 
         self.MIN_SCORE_THRESHOLD = 0.5
@@ -55,14 +41,16 @@ class DetectionNode(TensorflowNode):
         if (self.republish_image):
             self.image_pub = self.create_publisher(ImageMsg, 'output_image', 10)
 
-        self.startup()
+        self.startup(tf_model)
 
-    def startup(self):
+    def startup(self, tf_model):
+
         # Load labels
+        PATH_TO_LABELS = tf_model.compute_label_path()
         self.category_index = label_map_util.create_category_index_from_labelmap(PATH_TO_LABELS, use_display_name=True)
 
         # Load model
-        self.graph, self.session = load_utils.load_frozen_model(PATH_TO_FROZEN_MODEL)
+        self.graph, self.session = tf_model.load_model()
         self.get_logger().info('Load model completed!')
 
         # Define input and output Tensors for detection_graph
@@ -77,7 +65,7 @@ class DetectionNode(TensorflowNode):
 
         # Publish vision info message (published only once with TRANSIENT LOCAL durability)
         vision_info_msg = VisionInfo()
-        vision_info_msg.method = "TensorFlow object detection network, trained on mscoco"
+        vision_info_msg.method = tf_model.description
         vision_info_msg.database_location = PATH_TO_LABELS
         self.vision_info_pub.publish(vision_info_msg)
 

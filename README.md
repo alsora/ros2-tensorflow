@@ -48,8 +48,8 @@ Install dependencies using rosdep
 
 Install the Tensorflow Object Detection Models
 
-    $ sudo apt-get install -y protobuf-compiler python-pil python-lxml python-tk
-    $ pip install --user Cython contextlib2 jupyter matplotlib
+    $ sudo apt-get install -y protobuf-compiler python-lxml python-tk
+    $ pip install --user Cython contextlib2 jupyter matplotlib Pillow
     $ git clone https://github.com/tensorflow/models.git /usr/local/lib/python3.6/dist-packages/tensorflow/models
     $ cd usr/local/lib/python3.6/dist-packages/tensorflow/models/research
     $ protoc object_detection/protos/*.proto --python_out=.
@@ -65,45 +65,30 @@ Build and install the `ros2-tensorflow` package
 
 ## Usage
 
-#### Image Detection Task
+The basic usage consists in creating a ROS 2 node which loads a Tensorflow model and another ROS 2 node that acts as a client and receives the result of the inference.
 
-Get a Tensorflow model for image detection from the [detection model zoo](https://github.com/tensorflow/models/blob/master/research/object_detection/g3doc/detection_model_zoo.md#coco-trained-models) uncompress it and place it inside the Tensorflow Models Object Detection directory at `/usr/local/lib/python3.6/dist-packages/tensorflow/models/research/object_detection`.
+It is possible to specify which model a node should load.
+Note that if the model is specified via url, as it is by default, the first time the node is executed a network connection will be required in order to download the model.
 
-For example
+#### Object Detection Task
 
-    $ cd /usr/local/lib/python3.6/dist-packages/tensorflow/models/research/object_detection
-    $ wget http://download.tensorflow.org/models/object_detection/ssd_mobilenet_v1_coco_2017_11_17.tar.gz
-    $ tar -xf ssd_mobilenet_v1_coco_2017_11_17.tar.gz
-
-**IMPORTANT**:If you want to use a different model or you installed Tensorflow Models in a different place, make sure to edit the paths inside the nodes and build again the workspace.
-
-Test the image detection service by running in separate terminals
+Test the object detection server by running in separate terminals
 
     $ ros2 run tf_detection_py server
     $ ros2 run tf_detection_py client_test
 
-Real time image detection using your laptop camera
+Setup a real object detection pipeline using a stream of images coming from a ROS 2 camera node
 
     $ rviz2
     $ ros2 run tf_detection_py subscriber
     $ ros2 run image_tools cam2image --ros-args -p topic:=camera -p frequency:=5.0
 
 
+You can get additional Tensorflow model for object detection from the [detection model zoo](https://github.com/tensorflow/models/blob/master/research/object_detection/g3doc/detection_model_zoo.md#coco-trained-models).
+
 #### Image Classification Task
 
-Get a Tensorflow model for image classification.
-
-For example
-
-    $ mkdir -p /usr/local/lib/python3.6/dist-packages/tensorflow/models/tutorial/image/imagenet
-    $ cd /usr/local/lib/python3.6/dist-packages/tensorflow/models/tutorial/image/imagenet
-    $ wget http://download.tensorflow.org/models/image/imagenet/inception-2015-12-05.tgz
-    $ mkdir inception-2015-12-05
-    $ tar -xf inception-2015-12-05.tgz -C inception-2015-12-05
-
-**IMPORTANT**:If you want to use a different model or you installed Tensorflow Models in a different place, make sure to edit the paths inside the nodes and build again the workspace.
-
-Test the image classification service by running in separate terminals
+Test the image classification server by running in separate terminals
 
     $ ros2 run tf_classification_py server
     $ ros2 run tf_classification_py client_test

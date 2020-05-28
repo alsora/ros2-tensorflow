@@ -16,13 +16,14 @@
 import rclpy
 
 from tf_classification_py.classification_node import ClassificationNode
+from tf_classification_py.models import IMAGENET_INCEPTION
 
 
 def main(args=None):
 
     rclpy.init(args=args)
 
-    node = ClassificationNode('classification_server')
+    node = ClassificationNode(IMAGENET_INCEPTION, 'classification_server')
     node.create_classification_server('image_classification')
     rclpy.spin(node)
 
