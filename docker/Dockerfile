@@ -144,6 +144,7 @@ WORKDIR $HOME
 RUN rosdep update
 
 RUN mkdir -p $HOME/tf_ws/src
+ADD https://api.github.com/repos/alsora/ros2-tensorflow/git/refs/heads/master version.json
 RUN git clone https://github.com/alsora/ros2-tensorflow $HOME/tf_ws/src/ros2-tensorflow
 WORKDIR $HOME/tf_ws
 RUN rosdep install --from-paths src --ignore-src --rosdistro eloquent -y
