@@ -32,8 +32,8 @@ setup(
     tests_require=['pytest'],
     entry_points={
         'console_scripts': [
-            'server = tf_classification_py.server:main',
-            'client_test = tf_classification_py.client_test:main'
+            'server = tf_classification_py.examples.server:main',
+            'client_test = tf_classification_py.examples.client_test:main'
         ],
     },
 )
