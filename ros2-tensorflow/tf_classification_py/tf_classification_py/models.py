@@ -15,9 +15,9 @@
 
 import os
 
+from ros2_tensorflow.utils import models as models_utils
 import tensorflow as tf
 
-from ros2_tensorflow.utils import models as models_utils
 
 TENSORFLOW_IMAGENET_DIR = os.path.join(os.path.dirname(tf.__file__), 'models/image/imagenet')
 

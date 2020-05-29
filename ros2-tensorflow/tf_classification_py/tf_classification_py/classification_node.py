@@ -14,7 +14,6 @@
 # ==============================================================================
 
 import numpy as np
-import tensorflow as tf
 
 from ros2_tensorflow.node.tensorflow_node import TensorflowNode
 from ros2_tensorflow.utils import img_conversion as img_utils
@@ -45,7 +44,7 @@ class ClassificationNode(TensorflowNode):
         self.warmup()
 
     def create_classification_server(self, topic_name):
-        self.srv = self.create_service(ImageClassificationSrv, topic_name, self.handle_image_classification_srv)
+        self.create_service(ImageClassificationSrv, topic_name, self.handle_image_classification_srv)
 
     def classify(self, image_np):
         start_time = self.get_clock().now()
@@ -55,7 +54,8 @@ class ClassificationNode(TensorflowNode):
                 feed_dict={self.image_tensor: image_np})
 
         elapsed_time = self.get_clock().now() - start_time
-        self.get_logger().debug('Image classification took: %r milliseconds' % (elapsed_time.nanoseconds / 1000000))
+        elapsed_time_ms = elapsed_time.nanoseconds / 1000000
+        self.get_logger().debug('Image classification took: %r milliseconds' % elapsed_time_ms)
 
         return predictions
 

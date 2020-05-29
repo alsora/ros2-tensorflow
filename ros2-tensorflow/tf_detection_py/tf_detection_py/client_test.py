@@ -31,8 +31,11 @@ def main(args=None):
 
     client = node.create_client(ImageDetectionSrv, 'image_detection')
 
-    vision_info_callback = lambda info_msg : node.get_logger().info('received vision info %r' % info_msg)
-    info_subscription = node.create_subscription(VisionInfoMsg, 'vision_info', vision_info_callback, qos_profile=qos_profile_vision_info)
+    def vision_info_callback(vision_info_msg):
+        node.get_logger().info('received vision info %r' % vision_info_msg)
+
+    node.create_subscription(
+        VisionInfoMsg, 'vision_info', vision_info_callback, qos_profile=qos_profile_vision_info)
 
     while not client.wait_for_service(timeout_sec=1.0):
         node.get_logger().info('service not available, waiting again...')

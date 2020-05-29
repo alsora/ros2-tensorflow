@@ -30,6 +30,7 @@ class TensorflowNode(Node):
         vision_info_msg = VisionInfo()
         vision_info_msg.method = tf_model.description
         vision_info_msg.database_location = tf_model.compute_label_path()
-        
-        vision_info_pub = self.create_publisher(VisionInfo, 'vision_info', qos_profile=qos_profile_vision_info)
+
+        vision_info_pub = self.create_publisher(
+            VisionInfo, 'vision_info', qos_profile=qos_profile_vision_info)
         vision_info_pub.publish(vision_info_msg)

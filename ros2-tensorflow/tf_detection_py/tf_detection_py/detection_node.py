@@ -14,7 +14,6 @@
 # ==============================================================================
 
 import numpy as np
-import tensorflow as tf
 
 from object_detection.utils import label_map_util
 from object_detection.utils import visualization_utils as vis_util
@@ -46,7 +45,8 @@ class DetectionNode(TensorflowNode):
 
         # Load labels
         path_to_labels = tf_model.compute_label_path()
-        self.category_index = label_map_util.create_category_index_from_labelmap(path_to_labels, use_display_name=True)
+        self.category_index = label_map_util.create_category_index_from_labelmap(
+            path_to_labels, use_display_name=True)
 
         # Load model
         self.graph, self.session = tf_model.load_model()
@@ -65,10 +65,10 @@ class DetectionNode(TensorflowNode):
         self.warmup()
 
     def create_detection_server(self, topic_name):
-        self.detection_server = self.create_service(ImageDetectionSrv, topic_name, self.handle_image_detection_srv)
+        self.create_service(ImageDetectionSrv, topic_name, self.handle_image_detection_srv)
 
     def create_detection_subscription(self, topic_name):
-        self.image_sub = self.create_subscription(ImageMsg, topic_name, self.image_detection_callback, 10)
+        self.create_subscription(ImageMsg, topic_name, self.image_detection_callback, 10)
         self.detection_pub = self.create_publisher(Detection2DArray, 'detections', 10)
 
     def detect(self, image_np):
@@ -79,11 +79,13 @@ class DetectionNode(TensorflowNode):
 
         # Actual detection.
         (boxes, scores, classes, num) = self.session.run(
-                [self.detection_boxes, self.detection_scores, self.detection_classes, self.num_detections],
-                feed_dict={self.image_tensor: image_np_expanded})
+            [self.detection_boxes, self.detection_scores,
+                self.detection_classes, self.num_detections],
+            feed_dict={self.image_tensor: image_np_expanded})
 
         elapsed_time = self.get_clock().now() - start_time
-        self.get_logger().debug('Image detection took: %r milliseconds' % (elapsed_time.nanoseconds / 1000000))
+        elapsed_time_ms = elapsed_time.nanoseconds / 1000000
+        self.get_logger().debug('Image detection took: %r milliseconds' % elapsed_time_ms)
 
         return boxes, scores, classes, num
 
