@@ -16,12 +16,11 @@
 import numpy as np
 import tensorflow as tf
 
-from ros2_tensorflow.node.qos import qos_profile_vision_info
 from ros2_tensorflow.node.tensorflow_node import TensorflowNode
 from ros2_tensorflow.utils import img_conversion as img_utils
 
 from tf_interfaces.srv import ImageClassification as ImageClassificationSrv
-from vision_msgs.msg import ObjectHypothesis, VisionInfo
+from vision_msgs.msg import ObjectHypothesis
 
 
 class ClassificationNode(TensorflowNode):
@@ -29,7 +28,7 @@ class ClassificationNode(TensorflowNode):
     def __init__(self, tf_model, node_name):
         super().__init__(node_name)
 
-        self.vision_info_pub = self.create_publisher(VisionInfo, 'vision_info', qos_profile=qos_profile_vision_info)
+        self.publish_vision_info(tf_model)
 
         self.startup(tf_model)
 
@@ -42,12 +41,6 @@ class ClassificationNode(TensorflowNode):
         # Define input and output Tensors for classification_graph
         self.image_tensor = self.graph.get_tensor_by_name('DecodeJpeg:0')
         self.softmax_tensor = self.graph.get_tensor_by_name('softmax:0')
-
-        # Publish vision info message (published only once with TRANSIENT LOCAL durability)
-        vision_info_msg = VisionInfo()
-        vision_info_msg.method = tf_model.description
-        vision_info_msg.database_location = tf_model.compute_label_path()
-        self.vision_info_pub.publish(vision_info_msg)
 
         self.warmup()
 

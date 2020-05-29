@@ -19,13 +19,12 @@ import tensorflow as tf
 from object_detection.utils import label_map_util
 from object_detection.utils import visualization_utils as vis_util
 
-from ros2_tensorflow.node.qos import qos_profile_vision_info
 from ros2_tensorflow.node.tensorflow_node import TensorflowNode
 from ros2_tensorflow.utils import img_conversion as img_utils
 
 from sensor_msgs.msg import Image as ImageMsg
 from tf_interfaces.srv import ImageDetection as ImageDetectionSrv
-from vision_msgs.msg import Detection2D, Detection2DArray, ObjectHypothesisWithPose, VisionInfo
+from vision_msgs.msg import Detection2D, Detection2DArray, ObjectHypothesisWithPose
 
 
 class DetectionNode(TensorflowNode):
@@ -35,19 +34,19 @@ class DetectionNode(TensorflowNode):
 
         self.MIN_SCORE_THRESHOLD = 0.5
 
-        self.vision_info_pub = self.create_publisher(VisionInfo, 'vision_info', qos_profile=qos_profile_vision_info)
-
         self.republish_image = republish_image
         if (self.republish_image):
             self.image_pub = self.create_publisher(ImageMsg, 'output_image', 10)
+
+        self.publish_vision_info(tf_model)
 
         self.startup(tf_model)
 
     def startup(self, tf_model):
 
         # Load labels
-        PATH_TO_LABELS = tf_model.compute_label_path()
-        self.category_index = label_map_util.create_category_index_from_labelmap(PATH_TO_LABELS, use_display_name=True)
+        path_to_labels = tf_model.compute_label_path()
+        self.category_index = label_map_util.create_category_index_from_labelmap(path_to_labels, use_display_name=True)
 
         # Load model
         self.graph, self.session = tf_model.load_model()
@@ -62,12 +61,6 @@ class DetectionNode(TensorflowNode):
         self.detection_scores = self.graph.get_tensor_by_name('detection_scores:0')
         self.detection_classes = self.graph.get_tensor_by_name('detection_classes:0')
         self.num_detections = self.graph.get_tensor_by_name('num_detections:0')
-
-        # Publish vision info message (published only once with TRANSIENT LOCAL durability)
-        vision_info_msg = VisionInfo()
-        vision_info_msg.method = tf_model.description
-        vision_info_msg.database_location = PATH_TO_LABELS
-        self.vision_info_pub.publish(vision_info_msg)
 
         self.warmup()
 

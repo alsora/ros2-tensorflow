@@ -15,8 +15,21 @@
 
 from rclpy.node import Node
 
+from ros2_tensorflow.node.qos import qos_profile_vision_info
+from vision_msgs.msg import VisionInfo
+
 
 class TensorflowNode(Node):
 
     def __init__(self, node_name):
         super().__init__(node_name)
+
+    def publish_vision_info(self, tf_model):
+
+        # Publish vision info message (published only once with TRANSIENT LOCAL durability)
+        vision_info_msg = VisionInfo()
+        vision_info_msg.method = tf_model.description
+        vision_info_msg.database_location = tf_model.compute_label_path()
+        
+        vision_info_pub = self.create_publisher(VisionInfo, 'vision_info', qos_profile=qos_profile_vision_info)
+        vision_info_pub.publish(vision_info_msg)
