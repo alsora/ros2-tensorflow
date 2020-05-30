@@ -27,9 +27,13 @@ class ClassificationNode(TensorflowNode):
     def __init__(self, tf_model, node_name):
         super().__init__(node_name)
 
-        self.publish_vision_info(tf_model)
-
+        # Prepare the Tensorflow network
         self.startup(tf_model)
+
+        # Advertise info about the Tensorflow network
+        self.publish_vision_info(tf_model)
+        # Create ROS entities
+        self.create_service(ImageClassificationSrv, 'image_classification', self.handle_image_classification_srv)
 
     def startup(self, tf_model):
 
@@ -42,9 +46,6 @@ class ClassificationNode(TensorflowNode):
         self.softmax_tensor = self.graph.get_tensor_by_name('softmax:0')
 
         self.warmup()
-
-    def create_classification_server(self, topic_name):
-        self.create_service(ImageClassificationSrv, topic_name, self.handle_image_classification_srv)
 
     def classify(self, image_np):
         start_time = self.get_clock().now()

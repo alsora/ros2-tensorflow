@@ -80,8 +80,8 @@ Test the object detection server by running in separate terminals
 Setup a real object detection pipeline using a stream of images coming from a ROS 2 camera node
 
     $ rviz2
-    $ ros2 run tf_detection_py subscriber
-    $ ros2 run image_tools cam2image --ros-args -p topic:=camera -p frequency:=5.0
+    $ ros2 run tf_detection_py server
+    $ ros2 run image_tools cam2image --ros-args -p frequency:=2.0
 
 
 You can get additional Tensorflow model for object detection from the [detection model zoo](https://github.com/tensorflow/models/blob/master/research/object_detection/g3doc/detection_model_zoo.md#coco-trained-models).

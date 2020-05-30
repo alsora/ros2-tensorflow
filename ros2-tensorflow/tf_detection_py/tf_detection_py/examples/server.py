@@ -24,7 +24,6 @@ def main(args=None):
     rclpy.init(args=args)
 
     node = DetectionNode(COCO_FASTER_RCNN, 'detection_server')
-    node.create_detection_server('image_detection')
     rclpy.spin(node)
 
     rclpy.shutdown()

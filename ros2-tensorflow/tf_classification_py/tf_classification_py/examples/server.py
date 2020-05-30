@@ -24,7 +24,6 @@ def main(args=None):
     rclpy.init(args=args)
 
     node = ClassificationNode(IMAGENET_INCEPTION, 'classification_server')
-    node.create_classification_server('image_classification')
     rclpy.spin(node)
 
     rclpy.shutdown()

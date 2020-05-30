@@ -32,14 +32,19 @@ class DetectionNode(TensorflowNode):
         super().__init__(node_name)
 
         self.MIN_SCORE_THRESHOLD = 0.5
+        
+        # Prepare the Tensorflow network
+        self.startup(tf_model)
 
+        # Advertise info about the Tensorflow network
+        self.publish_vision_info(tf_model)
+        # Create ROS entities
+        self.create_service(ImageDetectionSrv, 'image_detection', self.handle_image_detection_srv)
+        self.create_subscription(ImageMsg, 'image', self.image_detection_callback, 10)
+        self.detection_pub = self.create_publisher(Detection2DArray, 'detections', 10)
         self.republish_image = republish_image
         if (self.republish_image):
             self.image_pub = self.create_publisher(ImageMsg, 'output_image', 10)
-
-        self.publish_vision_info(tf_model)
-
-        self.startup(tf_model)
 
     def startup(self, tf_model):
 
@@ -63,13 +68,6 @@ class DetectionNode(TensorflowNode):
         self.num_detections = self.graph.get_tensor_by_name('num_detections:0')
 
         self.warmup()
-
-    def create_detection_server(self, topic_name):
-        self.create_service(ImageDetectionSrv, topic_name, self.handle_image_detection_srv)
-
-    def create_detection_subscription(self, topic_name):
-        self.create_subscription(ImageMsg, topic_name, self.image_detection_callback, 10)
-        self.detection_pub = self.create_publisher(Detection2DArray, 'detections', 10)
 
     def detect(self, image_np):
         start_time = self.get_clock().now()

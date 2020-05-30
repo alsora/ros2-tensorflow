@@ -34,7 +34,6 @@ setup(
         'console_scripts': [
             'server = tf_detection_py.examples.server:main',
             'client_test = tf_detection_py.examples.client_test:main',
-            'subscriber = tf_detection_py.examples.subscriber:main'
         ],
     },
 )
