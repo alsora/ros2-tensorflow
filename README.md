@@ -83,12 +83,25 @@ Setup a real object detection pipeline using a stream of images coming from a RO
     $ ros2 run tf_detection_py server
     $ ros2 run image_tools cam2image --ros-args -p frequency:=2.0
 
-
-You can get additional Tensorflow model for object detection from the [detection model zoo](https://github.com/tensorflow/models/blob/master/research/object_detection/g3doc/detection_model_zoo.md#coco-trained-models).
-
 #### Image Classification Task
 
 Test the image classification server by running in separate terminals
 
     $ ros2 run tf_classification_py server
     $ ros2 run tf_classification_py client_test
+
+## Loading different models
+
+The repository contains convenient APIs for loading Tensorflow models into the ROS 2 nodes.
+
+Models are defined using the `TensorflowModel` class, which acts as a descriptor for the model itself.
+It can either contain a path where the model can be found on the machine or an URL where the model can be downloaded the first time.
+
+Different model formats are also supported, such as frozen models and saved models.
+
+Some known supported models are already present as examples.
+See [classification models](ros2-tensorflow/tf_classification_py/tf_classification_py/models.py) and [detection models](ros2-tensorflow/tf_detection_py/tf_detection_py/models.py)
+
+
+The [Tensorflow models repository](https://github.com/tensorflow/models) contains many pretrained models that can be used.
+For example, you can get additional Tensorflow model for object detection from the [detection model zoo](https://github.com/tensorflow/models/blob/master/research/object_detection/g3doc/detection_model_zoo.md#coco-trained-models).

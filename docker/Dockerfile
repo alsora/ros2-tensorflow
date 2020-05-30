@@ -122,12 +122,13 @@ WORKDIR /usr/local/lib/python3.6/dist-packages/tensorflow/models/research
 RUN protoc object_detection/protos/*.proto --python_out=.
 
 # optional install COCO API for COCO metrics
-RUN git clone https://github.com/cocodataset/cocoapi.git $HOME/cocoapi
-WORKDIR $HOME/cocoapi/PythonAPI
-RUN rm Makefile
-COPY scripts/coco/Makefile $HOME/cocoapi/PythonAPI/Makefile
-RUN make
-RUN cp -r pycocotools /usr/local/lib/python3.6/dist-packages/tensorflow/models/research
+#RUN git clone https://github.com/cocodataset/cocoapi.git $HOME/cocoapi
+#WORKDIR $HOME/cocoapi/PythonAPI
+#RUN rm Makefile
+#COPY scripts/coco/Makefile $HOME/cocoapi/PythonAPI/Makefile
+#RUN make
+#RUN cp -r pycocotools /usr/local/lib/python3.6/dist-packages/tensorflow/models/research
+RUN pip install pycocotools
 
 ##### ROS2 VISION OPEN CV
 
