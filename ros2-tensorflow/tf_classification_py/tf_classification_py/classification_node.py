@@ -27,11 +27,11 @@ class ClassificationNode(TensorflowNode):
     def __init__(self, tf_model, node_name):
         super().__init__(node_name)
 
-        # Prepare the Tensorflow network
-        self.startup(tf_model)
-
         # ROS parameters
         self.num_predictions_p = self.declare_parameter('num_predictions', 5)
+
+        # Prepare the Tensorflow network
+        self.startup(tf_model)
 
         # Advertise info about the Tensorflow network
         self.publish_vision_info(tf_model)
@@ -44,24 +44,34 @@ class ClassificationNode(TensorflowNode):
         self.graph, self.session = tf_model.load_model()
         self.get_logger().info('Load model completed!')
 
-        # Define input and output Tensors for classification_graph
-        self.image_tensor = self.graph.get_tensor_by_name('DecodeJpeg:0')
-        self.softmax_tensor = self.graph.get_tensor_by_name('softmax:0')
+        # Define input tensor
+        self.input_image_tensor = self.graph.get_tensor_by_name('DecodeJpeg:0')
+
+        # Define output tensor
+        self.output_softmax_tensor = self.graph.get_tensor_by_name('softmax:0')
 
         self.warmup()
 
     def classify(self, image_np):
         start_time = self.get_clock().now()
 
-        predictions = self.session.run(
-                self.softmax_tensor,
-                feed_dict={self.image_tensor: image_np})
+        scores = self.session.run(
+                self.output_softmax_tensor,
+                feed_dict={self.input_image_tensor: image_np})
 
         elapsed_time = self.get_clock().now() - start_time
         elapsed_time_ms = elapsed_time.nanoseconds / 1000000
         self.get_logger().debug('Image classification took: %r milliseconds' % elapsed_time_ms)
 
-        return predictions
+        # Get top indices from softmax
+        scores = np.squeeze(scores)
+        top_classes = scores.argsort()[-self.num_predictions_p.value:][::-1]
+
+        output_dict = {}
+        output_dict['classification_classes'] = top_classes
+        output_dict['classification_scores'] = [scores[i] for i in top_classes]
+
+        return output_dict
 
     def warmup(self):
 
@@ -75,20 +85,17 @@ class ClassificationNode(TensorflowNode):
 
         image_np = img_utils.image_msg_to_image_np(request.image)
 
-        # This variable contains the softmax scores
-        predictions = self.classify(image_np)
+        output_dict = self.classify(image_np)
 
-        # Get top indices from softmax
-        predictions = np.squeeze(predictions)
-        k = self.num_predictions_p.value
-        top_k_predictions = predictions.argsort()[-k:][::-1]
+        classes = output_dict['classification_classes']
+        scores = output_dict['classification_scores']
 
         response.classification.header.stamp = self.get_clock().now().to_msg()
         response.classification.results = []
-        for prediction in top_k_predictions:
+        for i in range(len(classes)):
             hypotesis = ObjectHypothesis()
-            hypotesis.id = prediction.item()
-            hypotesis.score = predictions[prediction].item()
+            hypotesis.id = classes[i].item()
+            hypotesis.score = scores[i].item()
             response.classification.results.append(hypotesis)
 
         return response

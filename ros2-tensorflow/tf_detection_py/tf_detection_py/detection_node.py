@@ -58,15 +58,15 @@ class DetectionNode(TensorflowNode):
         self.graph, self.session = tf_model.load_model()
         self.get_logger().info('Load model completed!')
 
-        # Define input and output Tensors for detection_graph
-        self.image_tensor = self.graph.get_tensor_by_name('image_tensor:0')
-        # Each box represents a part of the image where a particular object was detected.
-        self.detection_boxes = self.graph.get_tensor_by_name('detection_boxes:0')
-        # Each score represent how level of confidence for each of the objects.
-        # Score is shown on the result image, together with the class label.
-        self.detection_scores = self.graph.get_tensor_by_name('detection_scores:0')
-        self.detection_classes = self.graph.get_tensor_by_name('detection_classes:0')
-        self.num_detections = self.graph.get_tensor_by_name('num_detections:0')
+        # Define input tensor
+        self.input_image_tensor = self.graph.get_tensor_by_name('image_tensor:0')
+
+        # Define output tensors
+        self.output_tensor_dict = {}
+        self.output_tensor_dict['detection_boxes'] = self.graph.get_tensor_by_name('detection_boxes:0')
+        self.output_tensor_dict['detection_classes'] = self.graph.get_tensor_by_name('detection_classes:0')
+        self.output_tensor_dict['detection_scores'] = self.graph.get_tensor_by_name('detection_scores:0')
+        self.output_tensor_dict['num_detections'] = self.graph.get_tensor_by_name('num_detections:0')
 
         self.warmup()
 
@@ -76,17 +76,25 @@ class DetectionNode(TensorflowNode):
         # Expand dimensions since the model expects images to have shape: [1, None, None, 3]
         image_np_expanded = np.expand_dims(image_np, axis=0)
 
-        # Actual detection.
-        (boxes, scores, classes, num) = self.session.run(
-            [self.detection_boxes, self.detection_scores,
-                self.detection_classes, self.num_detections],
-            feed_dict={self.image_tensor: image_np_expanded})
+        # Perform the inference
+        output_dict = self.session.run(
+            self.output_tensor_dict,
+            feed_dict={self.input_image_tensor: image_np_expanded})
 
         elapsed_time = self.get_clock().now() - start_time
         elapsed_time_ms = elapsed_time.nanoseconds / 1000000
         self.get_logger().debug('Image detection took: %r milliseconds' % elapsed_time_ms)
 
-        return boxes, scores, classes, num
+        # Reshape the tensors:
+        # - squeeze to remove the batch dimension (since here we fed a single image)
+        # - keep only the first num_detections elements
+        num_detections = int(output_dict.pop('num_detections'))
+        output_dict = {key: value[0, :num_detections] for key, value in output_dict.items()}
+
+        # Convert classes from float to int
+        output_dict['detection_classes'] = output_dict['detection_classes'].astype(np.uint8)
+
+        return output_dict
 
     def warmup(self):
 
@@ -96,13 +104,13 @@ class DetectionNode(TensorflowNode):
 
         self.get_logger().info('Warmup completed! Ready to receive real images!')
 
-    def create_image_msg_with_detections(self, image_np, boxes, scores, classes):
+    def create_image_msg_with_detections(self, image_np, output_dict):
         # Visualization of the results of a detection.
         vis_util.visualize_boxes_and_labels_on_image_array(
                 image_np,
-                np.squeeze(boxes),
-                np.squeeze(classes).astype(np.int32),
-                np.squeeze(scores),
+                output_dict['detection_boxes'],
+                output_dict['detection_classes'],
+                output_dict['detection_scores'],
                 self.category_index,
                 use_normalized_coordinates=True,
                 min_score_thresh=self.min_score_thresh_p.value,
@@ -119,21 +127,19 @@ class DetectionNode(TensorflowNode):
 
         return img_msg
 
-    def create_detections_msg(self, image_np, boxes, scores, classes, num):
+    def create_detections_msg(self, image_np, output_dict):
         img_height = image_np.shape[0]
         img_width = image_np.shape[1]
 
-        # remove additional dimension
-        boxes = boxes[0]
-        classes = classes[0]
-        num = num[0]
-        scores = scores[0]
+        boxes = output_dict['detection_boxes']
+        classes = output_dict['detection_classes']
+        scores = output_dict['detection_scores']
 
         detections = Detection2DArray()
 
         detections.header.stamp = self.get_clock().now().to_msg()
         detections.detections = []
-        for i in range(int(num)):
+        for i in range(len(boxes)):
             if scores[i] < self.min_score_thresh_p.value:
                 break
 
@@ -141,12 +147,11 @@ class DetectionNode(TensorflowNode):
             det.header = detections.header
             det.results = []
             detected_object = ObjectHypothesisWithPose()
-            detected_object.id = int(classes[i].item())
+            detected_object.id = classes[i].item()
             detected_object.score = scores[i].item()
             det.results.append(detected_object)
 
-            # box is min y, min x, max y, max x
-            # in normalized coordinates
+            # box is ymin, xmin, ymax, xmax in normalized coordinates
             box = boxes[i]
             det.bbox.size_y = (box[2] - box[0]) * img_height
             det.bbox.size_x = (box[3] - box[1]) * img_width
@@ -161,13 +166,13 @@ class DetectionNode(TensorflowNode):
 
         image_np = img_utils.image_msg_to_image_np(request.image)
 
-        boxes, scores, classes, num = self.detect(image_np)
+        output_dict = self.detect(image_np)
 
         if (self.republish_image):
-            img_msg = self.create_image_msg_with_detections(image_np, boxes, scores, classes)
+            img_msg = self.create_image_msg_with_detections(image_np, output_dict)
             self.image_pub.publish(img_msg)
 
-        response.detections = self.create_detections_msg(image_np, boxes, scores, classes, num)
+        response.detections = self.create_detections_msg(image_np, output_dict)
 
         return response
 
@@ -175,11 +180,11 @@ class DetectionNode(TensorflowNode):
 
         image_np = img_utils.image_msg_to_image_np(img_msg)
 
-        boxes, scores, classes, num = self.detect(image_np)
+        output_dict = self.detect(image_np)
 
         if (self.republish_image):
-            img_msg = self.create_image_msg_with_detections(image_np, boxes, scores, classes)
+            img_msg = self.create_image_msg_with_detections(image_np, output_dict)
             self.image_pub.publish(img_msg)
 
-        detections_msg = self.create_detections_msg(image_np, boxes, scores, classes, num)
+        detections_msg = self.create_detections_msg(image_np, output_dict)
         self.detection_pub.publish(detections_msg)
