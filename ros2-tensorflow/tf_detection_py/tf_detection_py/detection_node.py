@@ -31,8 +31,11 @@ class DetectionNode(TensorflowNode):
     def __init__(self, tf_model, node_name, republish_image=True):
         super().__init__(node_name)
 
-        self.MIN_SCORE_THRESHOLD = 0.5
-        
+        self.republish_image = republish_image
+        # ROS parameters
+        self.min_score_thresh_p = self.declare_parameter('min_score_thresh', 0.5)
+        self.input_topic_p = self.declare_parameter('input_topic', 'image')
+
         # Prepare the Tensorflow network
         self.startup(tf_model)
 
@@ -40,11 +43,9 @@ class DetectionNode(TensorflowNode):
         self.publish_vision_info(tf_model)
         # Create ROS entities
         self.create_service(ImageDetectionSrv, 'image_detection', self.handle_image_detection_srv)
-        self.create_subscription(ImageMsg, 'image', self.image_detection_callback, 10)
+        self.create_subscription(ImageMsg, self.input_topic_p.value, self.image_detection_callback, 10)
         self.detection_pub = self.create_publisher(Detection2DArray, 'detections', 10)
-        self.republish_image = republish_image
-        if (self.republish_image):
-            self.image_pub = self.create_publisher(ImageMsg, 'output_image', 10)
+        self.image_pub = self.create_publisher(ImageMsg, 'detections_image', 10)
 
     def startup(self, tf_model):
 
@@ -104,7 +105,7 @@ class DetectionNode(TensorflowNode):
                 np.squeeze(scores),
                 self.category_index,
                 use_normalized_coordinates=True,
-                min_score_thresh=self.MIN_SCORE_THRESHOLD,
+                min_score_thresh=self.min_score_thresh_p.value,
                 line_thickness=8)
 
         img_msg = ImageMsg()
@@ -133,7 +134,7 @@ class DetectionNode(TensorflowNode):
         detections.header.stamp = self.get_clock().now().to_msg()
         detections.detections = []
         for i in range(int(num)):
-            if scores[i] < self.MIN_SCORE_THRESHOLD:
+            if scores[i] < self.min_score_thresh_p.value:
                 break
 
             det = Detection2D()

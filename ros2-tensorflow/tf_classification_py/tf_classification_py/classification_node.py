@@ -30,6 +30,9 @@ class ClassificationNode(TensorflowNode):
         # Prepare the Tensorflow network
         self.startup(tf_model)
 
+        # ROS parameters
+        self.num_predictions_p = self.declare_parameter('num_predictions', 5)
+
         # Advertise info about the Tensorflow network
         self.publish_vision_info(tf_model)
         # Create ROS entities
@@ -77,7 +80,7 @@ class ClassificationNode(TensorflowNode):
 
         # Get top indices from softmax
         predictions = np.squeeze(predictions)
-        k = 5
+        k = self.num_predictions_p.value
         top_k_predictions = predictions.argsort()[-k:][::-1]
 
         response.classification.header.stamp = self.get_clock().now().to_msg()
