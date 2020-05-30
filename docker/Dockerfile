@@ -142,6 +142,7 @@ RUN cp -r pycocotools /usr/local/lib/python3.6/dist-packages/tensorflow/models/r
 WORKDIR $HOME
 
 RUN rosdep update
+RUN apt-get update
 
 RUN mkdir -p $HOME/tf_ws/src
 ADD https://api.github.com/repos/alsora/ros2-tensorflow/git/refs/heads/master version.json
