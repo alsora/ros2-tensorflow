@@ -16,14 +16,14 @@
 import rclpy
 
 from tf_detection_py.detection_node import DetectionNode
-from tf_detection_py.models import COCO_FASTER_RCNN
+from tf_detection_py.models import COCO_MOBILENET
 
 
 def main(args=None):
 
     rclpy.init(args=args)
 
-    node = DetectionNode(COCO_FASTER_RCNN, 'detection_server')
+    node = DetectionNode(COCO_MOBILENET, 'detection_server')
     rclpy.spin(node)
 
     rclpy.shutdown()

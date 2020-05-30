@@ -20,6 +20,7 @@ from object_detection.utils import visualization_utils as vis_util
 
 from ros2_tensorflow.node.tensorflow_node import TensorflowNode
 from ros2_tensorflow.utils import img_conversion as img_utils
+from tf_detection_py.detection_models import create as create_detection_model
 
 from sensor_msgs.msg import Image as ImageMsg
 from tf_interfaces.srv import ImageDetection as ImageDetectionSrv
@@ -55,44 +56,19 @@ class DetectionNode(TensorflowNode):
             path_to_labels, use_display_name=True)
 
         # Load model
-        self.graph, self.session = tf_model.load_model()
+        self.network_model = create_detection_model(tf_model)
         self.get_logger().info('Load model completed!')
-
-        # Define input tensor
-        self.input_image_tensor = self.graph.get_tensor_by_name('image_tensor:0')
-
-        # Define output tensors
-        self.output_tensor_dict = {}
-        self.output_tensor_dict['detection_boxes'] = self.graph.get_tensor_by_name('detection_boxes:0')
-        self.output_tensor_dict['detection_classes'] = self.graph.get_tensor_by_name('detection_classes:0')
-        self.output_tensor_dict['detection_scores'] = self.graph.get_tensor_by_name('detection_scores:0')
-        self.output_tensor_dict['num_detections'] = self.graph.get_tensor_by_name('num_detections:0')
 
         self.warmup()
 
     def detect(self, image_np):
         start_time = self.get_clock().now()
 
-        # Expand dimensions since the model expects images to have shape: [1, None, None, 3]
-        image_np_expanded = np.expand_dims(image_np, axis=0)
-
-        # Perform the inference
-        output_dict = self.session.run(
-            self.output_tensor_dict,
-            feed_dict={self.input_image_tensor: image_np_expanded})
+        output_dict = self.network_model.inference(image_np)
 
         elapsed_time = self.get_clock().now() - start_time
         elapsed_time_ms = elapsed_time.nanoseconds / 1000000
         self.get_logger().debug('Image detection took: %r milliseconds' % elapsed_time_ms)
-
-        # Reshape the tensors:
-        # - squeeze to remove the batch dimension (since here we fed a single image)
-        # - keep only the first num_detections elements
-        num_detections = int(output_dict.pop('num_detections'))
-        output_dict = {key: value[0, :num_detections] for key, value in output_dict.items()}
-
-        # Convert classes from float to int
-        output_dict['detection_classes'] = output_dict['detection_classes'].astype(np.uint8)
 
         return output_dict
 

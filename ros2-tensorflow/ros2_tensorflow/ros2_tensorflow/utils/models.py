@@ -25,6 +25,7 @@ import tensorflow as tf
 
 class SaveLoadFormat(Enum):
     FROZEN_MODEL = 1
+    SAVED_MODEL = 2
 
 
 class TensorflowModel:
@@ -83,15 +84,6 @@ class TensorflowModel:
 
     def compute_label_path(self):
         return self.label_path
-
-    def load_model(self):
-        # Make sure that we have a valid model path before loading
-        model_path = self.compute_model_path()
-
-        # Load the model according to the specified format
-        return {
-            SaveLoadFormat.FROZEN_MODEL: lambda path: load_frozen_model(path)
-        }[self.save_load_format](model_path)
 
 
 def maybe_download_and_extract(url_source, download_directory, filename=None, extract=True, expected_bytes=None):
@@ -206,3 +198,11 @@ def load_frozen_model(frozen_model_path):
 
     session = tf.compat.v1.Session(graph=graph)
     return graph, session
+
+
+def load_saved_model(saved_model_dir):
+
+    model = tf.saved_model.load(str(saved_model_dir))
+    model = model.signatures['serving_default']
+
+    return model

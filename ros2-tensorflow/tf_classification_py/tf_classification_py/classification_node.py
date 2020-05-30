@@ -17,6 +17,7 @@ import numpy as np
 
 from ros2_tensorflow.node.tensorflow_node import TensorflowNode
 from ros2_tensorflow.utils import img_conversion as img_utils
+from ros2_tensorflow.utils import models as models_utils
 
 from tf_interfaces.srv import ImageClassification as ImageClassificationSrv
 from vision_msgs.msg import ObjectHypothesis
@@ -40,8 +41,12 @@ class ClassificationNode(TensorflowNode):
 
     def startup(self, tf_model):
 
+        if tf_model.save_load_format != models_utils.SaveLoadFormat.FROZEN_MODEL:
+            raise ValueError('Classification node currently supports only FROZEN MODELS')
+
         # Load model
-        self.graph, self.session = tf_model.load_model()
+        model_path = tf_model.compute_model_path()
+        self.graph, self.session = models_utils.load_frozen_model(model_path)
         self.get_logger().info('Load model completed!')
 
         # Define input tensor
