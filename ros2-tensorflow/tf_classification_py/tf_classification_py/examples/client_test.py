@@ -14,14 +14,13 @@
 # ==============================================================================
 
 import rclpy
+import tensorflow as tf
 
 from ros2_tensorflow.node.qos import qos_profile_vision_info
 from ros2_tensorflow.utils import img_conversion as img_utils
 
 from tf_interfaces.srv import ImageClassification as ImageClassificationSrv
 from vision_msgs.msg import VisionInfo as VisionInfoMsg
-
-IMG_PATH = '/root/ros2-tensorflow/data/dog.jpg'
 
 
 def main(args=None):
@@ -37,11 +36,15 @@ def main(args=None):
     node.create_subscription(
         VisionInfoMsg, 'vision_info', vision_info_callback, qos_profile=qos_profile_vision_info)
 
+    img_path = tf.keras.utils.get_file(
+        'YellowLabradorLooking_new.jpg',
+        'https://storage.googleapis.com/download.tensorflow.org/example_images/YellowLabradorLooking_new.jpg')
+
     while not client.wait_for_service(timeout_sec=1.0):
         node.get_logger().info('service not available, waiting again...')
 
     req = ImageClassificationSrv.Request()
-    req.image = img_utils.jpg_to_image_msg(IMG_PATH)
+    req.image = img_utils.jpg_to_image_msg(img_path)
 
     future = client.call_async(req)
     rclpy.spin_until_future_complete(node, future)
