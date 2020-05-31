@@ -121,6 +121,9 @@ RUN git clone https://github.com/tensorflow/models.git /usr/local/lib/python3.6/
 WORKDIR /usr/local/lib/python3.6/dist-packages/tensorflow/models/research
 RUN protoc object_detection/protos/*.proto --python_out=.
 
+# Tensorflow-Slim (required for image segmentation)
+RUN pip install tf_slim
+
 # optional install COCO API for COCO metrics
 #RUN git clone https://github.com/cocodataset/cocoapi.git $HOME/cocoapi
 #WORKDIR $HOME/cocoapi/PythonAPI

@@ -14,6 +14,8 @@
 # ==============================================================================
 
 import numpy as np
+
+from object_detection.utils import ops as utils_ops
 import tensorflow as tf
 
 from ros2_tensorflow.utils import models as models_utils
@@ -40,6 +42,12 @@ class FrozenDetectionModel():
         self.output_tensor_dict['detection_scores'] = self.graph.get_tensor_by_name('detection_scores:0')
         self.output_tensor_dict['num_detections'] = self.graph.get_tensor_by_name('num_detections:0')
 
+        # The following output tensors are optional
+        ops = self.graph.get_operations()
+        all_tensor_names = {output.name for op in ops for output in op.outputs}
+        if 'detection_masks:0' in all_tensor_names:
+            self.output_tensor_dict['detection_masks'] = self.graph.get_tensor_by_name('detection_masks:0')
+
     def inference(self, image_np):
         # Expand dimensions since the model expects images to have shape: [1, None, None, 3]
         image_np_expanded = np.expand_dims(image_np, axis=0)
@@ -55,8 +63,14 @@ class FrozenDetectionModel():
         num_detections = int(output_dict.pop('num_detections'))
         output_dict = {key: value[0, :num_detections] for key, value in output_dict.items()}
 
-        # Convert classes from float to int (values are already numpy arrays)
+        # output_dict already contains numpy arrays
+        # Convert classes from float to int
         output_dict['detection_classes'] = output_dict['detection_classes'].astype(np.uint8)
+
+        # The following output tensors are optional
+        if 'detection_masks' in output_dict:
+            reframe_detection_masks(output_dict, image_np)
+            output_dict['detection_masks'] = output_dict['detection_masks'].numpy()
 
         return output_dict
 
@@ -75,6 +89,7 @@ class SavedDetectionModel():
     def inference(self, image_np):
         # Expand dimensions since the model expects images to have shape: [1, None, None, 3]
         image_np_expanded = np.expand_dims(image_np, axis=0)
+        # Convert to tensor
         input_tensor = tf.convert_to_tensor(image_np_expanded)
 
         # Perform the inference
@@ -88,9 +103,14 @@ class SavedDetectionModel():
 
         # Convert the tensors into numpy arrays
         # https://github.com/tensorflow/tensorflow/blob/master/tensorflow/python/framework/ops.py#L1047
-        output_dict['detection_classes'] = output_dict['detection_classes'].numpy().astype(np.uint8)
+        output_dict['detection_classes'] = output_dict['detection_classes'].numpy().astype(np.int64)
         output_dict['detection_boxes'] = output_dict['detection_boxes'].numpy()
         output_dict['detection_scores'] = output_dict['detection_scores'].numpy()
+
+        # The following output tensors are optional
+        if 'detection_masks' in output_dict:
+            reframe_detection_masks(output_dict, image_np)
+            output_dict['detection_masks'] = output_dict['detection_masks'].numpy()
 
         return output_dict
 
@@ -101,3 +121,13 @@ def create(tf_model):
         models_utils.SaveLoadFormat.FROZEN_MODEL: lambda model: FrozenDetectionModel(tf_model),
         models_utils.SaveLoadFormat.SAVED_MODEL: lambda model: SavedDetectionModel(tf_model)
     }[tf_model.save_load_format](tf_model)
+
+
+def reframe_detection_masks(output_dict, image_np):
+    # Reframe the the bbox mask to the image size.
+    # Original masks are represented in bounding box coordinates
+    detection_masks_reframed = utils_ops.reframe_box_masks_to_image_masks(
+            output_dict['detection_masks'], output_dict['detection_boxes'],
+            image_np.shape[0], image_np.shape[1])
+    detection_masks_reframed = tf.cast(detection_masks_reframed > 0.5, tf.uint8)
+    output_dict['detection_masks'] = detection_masks_reframed

@@ -7,13 +7,19 @@ The output can be directly visualized through Rviz
 
 ## Requirements
 
-In order to build the `ros2-tensorflow` package, the following dependencies are required
+In order to build the `ros2-tensorflow` package, the following dependencies are used
 
+Required dependencies:
  - [OpenCV Python](https://pypi.org/project/opencv-python/)
  - [ROS2 Eloquent](https://index.ros.org/doc/ros2/Installation/)
  - [Tensorflow](https://www.tensorflow.org/install/)
- - [Tensorflow Object Detection Models](https://github.com/tensorflow/models/blob/master/research/object_detection/g3doc/installation.md)
  - [Vision Msgs](https://github.com/Kukanani/vision_msgs)
+
+Object detection optional dependencies:
+ - [Tensorflow Object Detection Models](https://github.com/tensorflow/models/blob/master/research/object_detection/g3doc/installation.md)
+
+Mask segmentation optional dependencies
+ - [TensorFlow-Slim](https://github.com/google-research/tf-slim)
 
 The provided Dockerfile contains an Ubuntu 18.04 environment with all the dependencies already installed.
 
@@ -28,25 +34,18 @@ To use the Dockerfile:
 
 This section describes how to build the `ros2-tensorflow` package and the required depenencies in case you are not using the provided Dockerfile.
 
-Get the source code
+Get the source code and create the ROS 2 workspace
 
     $ git clone https://github.com/alsora/ros2-tensorflow.git $HOME/ros2-tensorflow
-
-Create a ROS2 workspace
-
     $ mkdir -p $HOME/tf_ws/src
-
-Add sources to workspace
-
-    $ cd $HOME/tf_ws/src
-    $ ln -s $HOME/ros2-tensorflow/ros2-tensorflow .
-
-Install dependencies using rosdep
-
     $ cd $HOME/tf_ws
+    $ ln -s $HOME/ros2-tensorflow/ros2-tensorflow src
+
+Install required dependencies using rosdep
+
     $ rosdep install --from-paths src --ignore-src --rosdistro eloquent -y
 
-Install the Tensorflow Object Detection Models
+Install the Tensorflow Object Detection Models (optional)
 
     $ sudo apt-get install -y protobuf-compiler python-lxml python-tk
     $ pip install --user Cython contextlib2 jupyter matplotlib Pillow
@@ -57,6 +56,10 @@ Install the Tensorflow Object Detection Models
 Add the object detection libraries to the PYTHONPATH
 
     $ echo 'export PYTHONPATH=$PYTHONPATH:/usr/local/lib/python3.6/dist-packages/tensorflow/models/research' >> $HOME/.bashrc
+
+Install Tensorflow Slim (optional)
+    
+    $ pip install tf_slim
 
 Build and install the `ros2-tensorflow` package
 

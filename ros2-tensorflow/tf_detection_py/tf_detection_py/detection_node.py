@@ -88,6 +88,7 @@ class DetectionNode(TensorflowNode):
                 output_dict['detection_classes'],
                 output_dict['detection_scores'],
                 self.category_index,
+                instance_masks=output_dict.get('detection_masks', None),
                 use_normalized_coordinates=True,
                 min_score_thresh=self.min_score_thresh_p.value,
                 line_thickness=8)

@@ -38,3 +38,11 @@ COCO_MOBILENET = models_utils.TensorflowModel().from_url(
     model_filename='saved_model',
     save_load_format=models_utils.SaveLoadFormat.SAVED_MODEL,
     description='TensorFlow Mobilenet network for object detection, trained on COCO dataset. Produces boxes')
+
+COCO_MASK_RCNN = models_utils.TensorflowModel().from_url(
+    url='http://download.tensorflow.org/models/object_detection/mask_rcnn_inception_v2_coco_2018_01_28.tar.gz',
+    label_path=COCO_LABELS,
+    download_directory=TENSORFLOW_OBJECT_DETECTION_DIR,
+    model_filename='saved_model',
+    save_load_format=models_utils.SaveLoadFormat.SAVED_MODEL,
+    description='TensorFlow RCNN Inception network for object detection, trained on COCO dataset. Produces masks')
