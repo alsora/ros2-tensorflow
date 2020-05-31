@@ -35,6 +35,7 @@ class DetectionNode(TensorflowNode):
         self.republish_image = republish_image
         # ROS parameters
         self.min_score_thresh_p = self.declare_parameter('min_score_thresh', 0.5)
+        self.ioa_thresh_p = self.declare_parameter('ioa_thresh', 1.0)  # Default disabled, use values smaller than 1 to enable
         self.input_topic_p = self.declare_parameter('input_topic', 'image')
 
         # Prepare the Tensorflow network
@@ -61,6 +62,51 @@ class DetectionNode(TensorflowNode):
 
         self.warmup()
 
+    def filter_detections(self, output_dict):
+        # Filter the detected objects to remove wrong detections
+        # - Remove boxes with detection score too small
+        # - Remove boxes according to Intersection Over Area
+        # among boxes with same detected class
+        to_be_removed = []
+
+        boxes = output_dict['detection_boxes']
+        classes = output_dict['detection_classes']
+        scores = output_dict['detection_scores']
+
+        for i in range(len(boxes)):
+            if scores[i] < self.min_score_thresh_p.value:
+                to_be_removed.append(i)
+                continue
+
+            area = (boxes[i][2] - boxes[i][0]) * (boxes[i][3] - boxes[i][1])
+            for j in range(len(boxes)):
+                if classes[j] != classes[i] or i == j or j in to_be_removed:
+                    continue
+
+                if scores[j] < self.min_score_thresh_p.value:
+                    to_be_removed.append(j)
+                    continue
+
+                # determine the coordinates of the intersection box
+                intersect_ymin = max(boxes[i][0], boxes[j][0])
+                intersect_xmin = max(boxes[i][1], boxes[j][1])
+                intersect_ymax = min(boxes[i][2], boxes[j][2])
+                intersect_xmax = min(boxes[i][3], boxes[j][3])
+                intersect_area = max(0, intersect_ymax - intersect_ymin) * max(0, intersect_xmax - intersect_xmin)
+
+                if (intersect_area / area) > self.ioa_thresh_p.value:
+                    to_be_removed.append(i)
+                    if scores[i] > scores[j]:
+                        self.get_logger().warn('Filtering higher score detection in favor of lower score one')
+                    break
+
+        # Remove all elements marked as "to_be_removed"
+        output_dict['detection_boxes'] = np.delete(output_dict['detection_boxes'], to_be_removed, axis=0)
+        output_dict['detection_classes'] = np.delete(output_dict['detection_classes'], to_be_removed, axis=0)
+        output_dict['detection_scores'] = np.delete(output_dict['detection_scores'], to_be_removed, axis=0)
+        if 'detection_masks' in output_dict:
+            output_dict['detection_masks'] = np.delete(output_dict['detection_masks'], to_be_removed, axis=0)
+
     def detect(self, image_np):
         start_time = self.get_clock().now()
 
@@ -69,6 +115,8 @@ class DetectionNode(TensorflowNode):
         elapsed_time = self.get_clock().now() - start_time
         elapsed_time_ms = elapsed_time.nanoseconds / 1000000
         self.get_logger().debug('Image detection took: %r milliseconds' % elapsed_time_ms)
+
+        self.filter_detections(output_dict)
 
         return output_dict
 
@@ -117,9 +165,6 @@ class DetectionNode(TensorflowNode):
         detections.header.stamp = self.get_clock().now().to_msg()
         detections.detections = []
         for i in range(len(boxes)):
-            if scores[i] < self.min_score_thresh_p.value:
-                break
-
             det = Detection2D()
             det.header = detections.header
             det.results = []
