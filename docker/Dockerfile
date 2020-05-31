@@ -47,9 +47,10 @@ RUN apt-get install -y \
   python3-vcstool
 
 # install python packages
+# specify a version of flake8 as the latest (3.8 is not compatible with ament)
 RUN pip3 install -U \
   argcomplete \
-  flake8 \
+  flake8==3.7 \
   flake8-blind-except \
   flake8-builtins \
   flake8-class-newline \
@@ -75,7 +76,7 @@ RUN apt-get install --no-install-recommends -y \
   libcunit1-dev
 
 # package required for building rviz plugins, but not included in base image
-RUN apt-get install -y ros-eloquent-rviz-visual-testing-framework
+RUN apt-get update && apt-get install -y ros-eloquent-rviz-visual-testing-framework
 
 # install rqt tools
 RUN apt-get install -y \
