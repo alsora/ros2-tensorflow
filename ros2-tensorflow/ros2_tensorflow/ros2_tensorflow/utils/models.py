@@ -117,10 +117,12 @@ def maybe_download_and_extract(url_source, download_directory, filename=None, ex
     if not os.path.exists(download_directory):
         os.makedirs(download_directory)
 
-    # Get the filename from the URL
-    filename_with_extension = url_source.split('/')[-1]
     if filename is None:
+        # Get the filename from the URL
+        filename_with_extension = url_source.split('/')[-1]
         filename = filename_with_extension.split('.')[0]
+    else:
+        filename_with_extension = filename
 
     filepath = os.path.join(download_directory, filename)
     # Download the file if not already existing
@@ -161,7 +163,7 @@ def maybe_download_and_extract(url_source, download_directory, filename=None, ex
                     # Remove the downloaded file if we extracted it
                     os.remove(filepath_with_extension)
                 else:
-                    print('Unknown compression_format only .tar.gz/.tar.bz2/.tar and .zip supported')
+                    print('Not extracting downloaded file as it is not .tar.gz/.tar.bz2/.tar or .zip')
                     # The file has not been extracted, so we keep the extension
                     filepath = filepath_with_extension
             except Exception as e:

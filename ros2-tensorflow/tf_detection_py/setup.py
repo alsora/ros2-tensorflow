@@ -32,8 +32,9 @@ setup(
     tests_require=['pytest'],
     entry_points={
         'console_scripts': [
-            'server = tf_detection_py.examples.server:main',
             'client_test = tf_detection_py.examples.client_test:main',
+            'face_detection = tf_detection_py.examples.face_detection:main',
+            'server = tf_detection_py.examples.server:main',
         ],
     },
 )
