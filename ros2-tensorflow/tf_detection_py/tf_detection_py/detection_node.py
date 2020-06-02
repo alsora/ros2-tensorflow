@@ -130,6 +130,7 @@ class DetectionNode(TensorflowNode):
 
     def create_image_msg_with_detections(self, image_np, output_dict):
         # Visualization of the results of a detection.
+        # NOTE: this method modifies the provided image
         vis_util.visualize_boxes_and_labels_on_image_array(
                 image_np,
                 output_dict['detection_boxes'],
@@ -141,15 +142,7 @@ class DetectionNode(TensorflowNode):
                 min_score_thresh=self.min_score_thresh_p.value,
                 line_thickness=8)
 
-        img_msg = ImageMsg()
-
-        img_msg.height = image_np.shape[0]
-        img_msg.width = image_np.shape[1]
-        img_msg.encoding = 'bgr8'
-        img_msg.data = image_np.tostring()
-        img_msg.step = len(img_msg.data) // img_msg.height
-        img_msg.header.frame_id = 'map'
-
+        img_msg = img_utils.image_np_to_image_msg(image_np)
         return img_msg
 
     def create_detections_msg(self, image_np, output_dict):
@@ -180,6 +173,13 @@ class DetectionNode(TensorflowNode):
             det.bbox.center.x = (box[1] + box[3]) * img_height / 2
             det.bbox.center.y = (box[0] + box[2]) * img_width / 2
 
+            if (self.republish_image):
+                box_img = image_np[
+                    int(box[0]*img_height):int(box[2]*img_height),
+                    int(box[1]*img_width):int(box[3]*img_width)]
+
+                det.source_img = img_utils.image_np_to_image_msg(box_img)
+
             detections.detections.append(det)
 
         return detections
@@ -190,11 +190,11 @@ class DetectionNode(TensorflowNode):
 
         output_dict = self.detect(image_np)
 
+        response.detections = self.create_detections_msg(image_np, output_dict)
+
         if (self.republish_image):
             img_msg = self.create_image_msg_with_detections(image_np, output_dict)
             self.image_pub.publish(img_msg)
-
-        response.detections = self.create_detections_msg(image_np, output_dict)
 
         return response
 
@@ -204,9 +204,9 @@ class DetectionNode(TensorflowNode):
 
         output_dict = self.detect(image_np)
 
+        detections_msg = self.create_detections_msg(image_np, output_dict)
+        self.detection_pub.publish(detections_msg)
+
         if (self.republish_image):
             img_msg = self.create_image_msg_with_detections(image_np, output_dict)
             self.image_pub.publish(img_msg)
-
-        detections_msg = self.create_detections_msg(image_np, output_dict)
-        self.detection_pub.publish(detections_msg)

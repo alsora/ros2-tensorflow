@@ -31,6 +31,19 @@ def image_msg_to_image_np(image_msg):
     return image_np
 
 
+def image_np_to_image_msg(image_np):
+    image_msg = ImageMsg()
+
+    image_msg.height = image_np.shape[0]
+    image_msg.width = image_np.shape[1]
+    image_msg.encoding = 'bgr8'
+    image_msg.data = image_np.tostring()
+    image_msg.step = len(image_msg.data) // image_msg.height
+    image_msg.header.frame_id = 'map'
+
+    return image_msg
+
+
 def jpg_to_image_msg(img_path):
 
     # br = CvBridge()

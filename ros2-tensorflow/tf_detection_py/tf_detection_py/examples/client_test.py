@@ -49,7 +49,10 @@ def main(args=None):
     future = client.call_async(req)
     rclpy.spin_until_future_complete(node, future)
     if future.result() is not None:
-        node.get_logger().info('Result of classification: %r' % future.result().detections)
+        detections = future.result().detections.detections
+        for det in detections:
+            det_result = det.results[0]
+            node.get_logger().info('Detected object %d with score %f' % (det_result.id, det_result.score))
     else:
         node.get_logger().error('Exception while calling service: %r' % future.exception())
 
