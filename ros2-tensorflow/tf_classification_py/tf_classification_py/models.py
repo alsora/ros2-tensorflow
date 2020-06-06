@@ -15,7 +15,7 @@
 
 import os
 
-from ros2_tensorflow.utils import models as models_utils
+from ros2_tf_core.utils import models as models_utils
 import tensorflow as tf
 
 

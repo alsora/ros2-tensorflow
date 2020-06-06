@@ -18,7 +18,7 @@
   <exec_depend>vision_msgs</exec_depend>
 
   <exec_depend>tf_interfaces</exec_depend>
-  <exec_depend>ros2_tensorflow</exec_depend>
+  <exec_depend>ros2_tf_core</exec_depend>
 
   <test_depend>ament_copyright</test_depend>
   <test_depend>ament_flake8</test_depend>

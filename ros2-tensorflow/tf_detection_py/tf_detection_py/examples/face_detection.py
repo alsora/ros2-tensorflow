@@ -17,7 +17,7 @@ import rclpy
 
 from tf_detection_py.detection_node import DetectionNode
 from tf_detection_py.models import TENSORFLOW_OBJECT_DETECTION_DIR
-from ros2_tensorflow.utils import models as models_utils
+from ros2_tf_core.utils import models as models_utils
 
 
 def main(args=None):

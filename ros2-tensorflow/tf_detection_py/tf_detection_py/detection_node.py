@@ -18,8 +18,8 @@ import numpy as np
 from object_detection.utils import label_map_util
 from object_detection.utils import visualization_utils as vis_util
 
-from ros2_tensorflow.node.tensorflow_node import TensorflowNode
-from ros2_tensorflow.utils import img_conversion as img_utils
+from ros2_tf_core.node.tensorflow_node import TensorflowNode
+from ros2_tf_core.utils import img_conversion as img_utils
 from tf_detection_py.detection_models import create as create_detection_model
 
 from sensor_msgs.msg import Image as ImageMsg

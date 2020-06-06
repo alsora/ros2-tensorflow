@@ -15,9 +15,9 @@
 
 import numpy as np
 
-from ros2_tensorflow.node.tensorflow_node import TensorflowNode
-from ros2_tensorflow.utils import img_conversion as img_utils
-from ros2_tensorflow.utils import models as models_utils
+from ros2_tf_core.node.tensorflow_node import TensorflowNode
+from ros2_tf_core.utils import img_conversion as img_utils
+from ros2_tf_core.utils import models as models_utils
 
 from tf_interfaces.srv import ImageClassification as ImageClassificationSrv
 from vision_msgs.msg import ObjectHypothesis
