@@ -23,7 +23,7 @@ TENSORFLOW_IMAGENET_DIR = os.path.join(os.path.dirname(tf.__file__), 'models/ima
 
 IMAGENET_INCEPTION = models_utils.ModelDescriptor().from_url(
     url='http://download.tensorflow.org/models/image/imagenet/inception-2015-12-05.tgz',
-    label_path=os.path.join(os.path.join(TENSORFLOW_IMAGENET_DIR, 'inception-2015-12-05'), 'imagenet_2012_challenge_label_map_proto.pbtxt'),
+    label_path=os.path.join(os.path.join(TENSORFLOW_IMAGENET_DIR, 'inception-2015-12-05'), 'imagenet_2012_challenge_label_map_proto.pbtxt'),  # noqa: E501
     download_directory=TENSORFLOW_IMAGENET_DIR,
     model_filename='classify_image_graph_def.pb',
     save_load_format=models_utils.SaveLoadFormat.FROZEN_MODEL,

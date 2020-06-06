@@ -14,11 +14,9 @@
 # ==============================================================================
 
 import rclpy
-import tensorflow as tf
-
-from ros2_tf_core.qos import qos_profile_vision_info
 from ros2_tf_core import img_conversion as img_utils
-
+from ros2_tf_core.qos import qos_profile_vision_info
+import tensorflow as tf
 from tf_interfaces.srv import ImageClassification as ImageClassificationSrv
 from vision_msgs.msg import VisionInfo as VisionInfoMsg
 
@@ -38,7 +36,7 @@ def main(args=None):
 
     img_path = tf.keras.utils.get_file(
         'YellowLabradorLooking_new.jpg',
-        'https://storage.googleapis.com/download.tensorflow.org/example_images/YellowLabradorLooking_new.jpg')
+        'https://storage.googleapis.com/download.tensorflow.org/example_images/YellowLabradorLooking_new.jpg')  # noqa: E501
 
     while not client.wait_for_service(timeout_sec=1.0):
         node.get_logger().info('service not available, waiting again...')

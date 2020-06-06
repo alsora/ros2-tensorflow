@@ -15,10 +15,9 @@
 
 import numpy as np
 
-from ros2_tf_core.tensorflow_node import TensorflowNode
 from ros2_tf_core import img_conversion as img_utils
 from ros2_tf_core import models as models_utils
-
+from ros2_tf_core.tensorflow_node import TensorflowNode
 from tf_interfaces.srv import ImageClassification as ImageClassificationSrv
 from vision_msgs.msg import ObjectHypothesis
 
@@ -37,7 +36,10 @@ class ClassificationNode(TensorflowNode):
         # Advertise info about the Tensorflow network
         self.publish_vision_info(tf_model)
         # Create ROS entities
-        self.create_service(ImageClassificationSrv, 'image_classification', self.handle_image_classification_srv)
+        self.create_service(
+            ImageClassificationSrv,
+            'image_classification',
+            self.handle_image_classification_srv)
 
     def startup(self, tf_model):
 

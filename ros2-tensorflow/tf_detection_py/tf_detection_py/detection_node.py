@@ -17,12 +17,10 @@ import numpy as np
 
 from object_detection.utils import label_map_util
 from object_detection.utils import visualization_utils as vis_util
-
-from ros2_tf_core.node.tensorflow_node import TensorflowNode
-from ros2_tf_core.utils import img_conversion as img_utils
-from tf_detection_py.detection_models import create as create_detection_model
-
+from ros2_tf_core import img_conversion as img_utils
+from ros2_tf_core.tensorflow_node import TensorflowNode
 from sensor_msgs.msg import Image as ImageMsg
+from tf_detection_py.detection_models import create as create_detection_model
 from tf_interfaces.srv import ImageDetection as ImageDetectionSrv
 from vision_msgs.msg import Detection2D, Detection2DArray, ObjectHypothesisWithPose
 
@@ -35,7 +33,8 @@ class DetectionNode(TensorflowNode):
         self.republish_image = republish_image
         # ROS parameters
         self.min_score_thresh_p = self.declare_parameter('min_score_thresh', 0.5)
-        self.ioa_thresh_p = self.declare_parameter('ioa_thresh', 1.0)  # Default disabled, use values smaller than 1 to enable
+        # Default disabled, use values smaller than 1 to enable
+        self.ioa_thresh_p = self.declare_parameter('ioa_thresh', 1.0)
         self.input_topic_p = self.declare_parameter('input_topic', 'image')
 
         # Prepare the Tensorflow network
@@ -45,7 +44,8 @@ class DetectionNode(TensorflowNode):
         self.publish_vision_info(tf_model)
         # Create ROS entities
         self.create_service(ImageDetectionSrv, 'image_detection', self.handle_image_detection_srv)
-        self.create_subscription(ImageMsg, self.input_topic_p.value, self.image_detection_callback, 10)
+        img_topic = self.input_topic_p.value
+        self.create_subscription(ImageMsg, img_topic, self.image_detection_callback, 10)
         self.detection_pub = self.create_publisher(Detection2DArray, 'detections', 10)
         self.image_pub = self.create_publisher(ImageMsg, 'detections_image', 10)
 
@@ -92,20 +92,27 @@ class DetectionNode(TensorflowNode):
                 intersect_xmin = max(boxes[i][1], boxes[j][1])
                 intersect_ymax = min(boxes[i][2], boxes[j][2])
                 intersect_xmax = min(boxes[i][3], boxes[j][3])
-                intersect_area = max(0, intersect_ymax - intersect_ymin) * max(0, intersect_xmax - intersect_xmin)
+
+                intersect_height = max(0, intersect_ymax - intersect_ymin)
+                intersect_width = max(0, intersect_xmax - intersect_xmin)
+                intersect_area = intersect_height * intersect_width
 
                 if (intersect_area / area) > self.ioa_thresh_p.value:
                     to_be_removed.append(i)
                     if scores[i] > scores[j]:
-                        self.get_logger().warn('Filtering higher score detection in favor of lower score one')
+                        self.get_logger().warn('Filter high score detection for low score one')
                     break
 
         # Remove all elements marked as "to_be_removed"
-        output_dict['detection_boxes'] = np.delete(output_dict['detection_boxes'], to_be_removed, axis=0)
-        output_dict['detection_classes'] = np.delete(output_dict['detection_classes'], to_be_removed, axis=0)
-        output_dict['detection_scores'] = np.delete(output_dict['detection_scores'], to_be_removed, axis=0)
+        output_dict['detection_boxes'] = np.delete(
+            output_dict['detection_boxes'], to_be_removed, axis=0)
+        output_dict['detection_classes'] = np.delete(
+            output_dict['detection_classes'], to_be_removed, axis=0)
+        output_dict['detection_scores'] = np.delete(
+            output_dict['detection_scores'], to_be_removed, axis=0)
         if 'detection_masks' in output_dict:
-            output_dict['detection_masks'] = np.delete(output_dict['detection_masks'], to_be_removed, axis=0)
+            output_dict['detection_masks'] = np.delete(
+                output_dict['detection_masks'], to_be_removed, axis=0)
 
     def detect(self, image_np):
         start_time = self.get_clock().now()

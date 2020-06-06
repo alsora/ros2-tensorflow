@@ -39,7 +39,9 @@ class ModelDescriptor:
         self.label_path = None
         self.description = ''
 
-    def from_url(self, url, label_path, download_directory='.', model_filename='', save_load_format=SaveLoadFormat.FROZEN_MODEL, description=''):
+    def from_url(self, url, label_path,
+                 download_directory='.', model_filename='',
+                 save_load_format=SaveLoadFormat.FROZEN_MODEL, description=''):
         if self.model_path is not None:
             raise NameError('Calling from url when a path has been already provided')
         self.url = url
@@ -50,7 +52,8 @@ class ModelDescriptor:
         self.description = description
         return self
 
-    def from_path(self, model_path, label_path, save_load_format=SaveLoadFormat.FROZEN_MODEL, description=''):
+    def from_path(self, model_path, label_path,
+                  save_load_format=SaveLoadFormat.FROZEN_MODEL, description=''):
         if self.url is not None:
             raise NameError('Calling from path when a url has been already provided')
         self.model_path = model_path
@@ -63,7 +66,7 @@ class ModelDescriptor:
         # If the model path is not specified, get it from url
         if self.model_path is None:
             if self.url is None:
-                raise NameError('Calling compute_paths when no url nor file path have been provided')
+                raise NameError('No url or file path have been provided')
             downloaded_path = maybe_download_and_extract(self.url, self.download_directory)
 
             if os.path.isdir(downloaded_path):
@@ -88,33 +91,39 @@ class ModelDescriptor:
         return self.label_path
 
 
-def maybe_download_and_extract(url_source, download_directory, filename=None, extract=True, expected_bytes=None):
-    # Adapted from https://github.com/tensorlayer/tensorlayer/blob/master/tensorlayer/files/utils.py
-    """Checks if file exists in download_directory otherwise tries to dowload the file,
-    and optionally also tries to extract the file if format is ".zip" or ".tar"
+def maybe_download_and_extract(url_source, download_directory,
+                               filename=None, extract=True, expected_bytes=None):
+    """
+    Check if file exists in download_directory otherwise tries to dowload and extract it.
+
     Parameters
-    -----------
-    url : str
+    ----------
+    url_source : str
         The URL to download the file from
     download_directory : str
         A folder path to search for the file in and dowload the file to
     filename : str
         The name of the (to be) dowloaded file.
     extract : boolean
-        If True, tries to uncompress the dowloaded file if it is ".tar.gz/.tar.bz2" or ".zip" file, default is True.
+        If True, tries to uncompress the dowloaded file, default is True.
+        Supported formats are ".tar.gz/.tar.bz2" or ".zip" files.
+        If different format, extraction is skipped.
     expected_bytes : int or None
-        If set tries to verify that the downloaded file is of the specified size, otherwise raises an Exception, defaults is None which corresponds to no check being performed.
+        If set tries to verify that the downloaded file is of the specified size,
+        otherwise raises an Exception, defaults is None which corresponds to no check.
+
     Returns
-    ----------
+    -------
     str
         File path of the dowloaded (uncompressed) file.
+
     Examples
     --------
-    >>> down_file = tl.files.maybe_download_and_extract(url_source='http://yann.lecun.com/exdb/mnist/',
-    ...                                            download_directory='data/',
-    ...                                            filename='train-images-idx3-ubyte.gz')
-    """
+    >>> res = maybe_download_and_extract(
+    ...     url_source='http://yann.lecun.com/exdb/mnist/',
+    ...     download_directory='data/')
 
+    """
     # Create a download directory if not already existing
     if not os.path.exists(download_directory):
         os.makedirs(download_directory)
@@ -135,7 +144,7 @@ def maybe_download_and_extract(url_source, download_directory, filename=None, ex
             sys.stdout.write(f'\r>> Downloading {filename} {percentage:.1f}%')
             sys.stdout.flush()
 
-        # The downloaded file must end with a correct extension to avoid problems when extracting it
+        # The downloaded file must end with a correct extension to avoid problems
         filepath_with_extension = os.path.join(download_directory, filename_with_extension)
         urllib.request.urlretrieve(url_source, filepath_with_extension, _progress)
 
@@ -165,7 +174,7 @@ def maybe_download_and_extract(url_source, download_directory, filename=None, ex
                     # Remove the downloaded file if we extracted it
                     os.remove(filepath_with_extension)
                 else:
-                    print('Not extracting downloaded file as it is not .tar.gz/.tar.bz2/.tar or .zip')
+                    print('Skipping file extraction as format not supported')
                     # The file has not been extracted, so we keep the extension
                     filepath = filepath_with_extension
             except Exception as e:

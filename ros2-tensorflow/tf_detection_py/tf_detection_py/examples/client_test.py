@@ -14,11 +14,9 @@
 # ==============================================================================
 
 import rclpy
-import tensorflow as tf
-
-from ros2_tf_core.qos import qos_profile_vision_info
 from ros2_tf_core import img_conversion as img_utils
-
+from ros2_tf_core.qos import qos_profile_vision_info
+import tensorflow as tf
 from tf_interfaces.srv import ImageDetection as ImageDetectionSrv
 from vision_msgs.msg import VisionInfo as VisionInfoMsg
 

@@ -14,10 +14,9 @@
 # ==============================================================================
 
 import rclpy
-
+from ros2_tf_core import models as models_utils
 from tf_detection_py.detection_node import DetectionNode
 from tf_detection_py.models import TENSORFLOW_OBJECT_DETECTION_DIR
-from ros2_tf_core import models as models_utils
 
 
 def main(args=None):
@@ -30,7 +29,7 @@ def main(args=None):
         'frozen_inference_graph_face.pb',
         extract=False)
     label_path = models_utils.maybe_download_and_extract(
-        'https://raw.githubusercontent.com/yeephycho/tensorflow-face-detection/master/protos/face_label_map.pbtxt',
+        'https://raw.githubusercontent.com/yeephycho/tensorflow-face-detection/master/protos/face_label_map.pbtxt',  # noqa: E501
         TENSORFLOW_OBJECT_DETECTION_DIR,
         'face_label_map.pbtxt',
         extract=False)
@@ -40,7 +39,7 @@ def main(args=None):
         model_path=model_path,
         label_path=label_path,
         save_load_format=models_utils.SaveLoadFormat.FROZEN_MODEL,
-        description='TensorFlow SSD Face Detection network, trained on WIDERFACE dataset. Produces boxes')
+        description='TensorFlow SSD Face Detection, trained on WIDERFACE dataset. Produces boxes')
 
     rclpy.init(args=args)
 

@@ -1,7 +1,7 @@
 from setuptools import find_packages
 from setuptools import setup
 
-package_name='ros2_tf_core'
+package_name = 'ros2_tf_core'
 
 setup(
     name=package_name,
