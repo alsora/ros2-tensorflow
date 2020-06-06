@@ -7,7 +7,7 @@ The output can be directly visualized through Rviz
 
 ## Requirements
 
-In order to build the `ros2-tensorflow` package, the following dependencies are used
+In order to build the `ros2-tensorflow` package, the following dependencies are needed
 
 Required dependencies:
  - [OpenCV Python](https://pypi.org/project/opencv-python/)
@@ -15,13 +15,11 @@ Required dependencies:
  - [Tensorflow](https://www.tensorflow.org/install/)
  - [Vision Msgs](https://github.com/Kukanani/vision_msgs)
 
-Object detection optional dependencies:
- - [Tensorflow Object Detection Models](https://github.com/tensorflow/models/blob/master/research/object_detection/g3doc/installation.md)
+Optional dependencies:
+ - [Tensorflow Object Detection Models](https://github.com/tensorflow/models/blob/master/research/object_detection/g3doc/installation.md) for object detection tasks
+ - [TensorFlow-Slim](https://github.com/google-research/tf-slim) for object segmentation tasks
 
-Mask segmentation optional dependencies
- - [TensorFlow-Slim](https://github.com/google-research/tf-slim)
-
-The provided Dockerfile contains an Ubuntu 18.04 environment with all the dependencies already installed.
+The provided Dockerfile contains an Ubuntu 18.04 environment with all the dependencies and this package already installed.
 
 To use the Dockerfile:
 
@@ -52,9 +50,7 @@ Install the Tensorflow Object Detection Models (optional)
     $ git clone https://github.com/tensorflow/models.git /usr/local/lib/python3.6/dist-packages/tensorflow/models
     $ cd usr/local/lib/python3.6/dist-packages/tensorflow/models/research
     $ protoc object_detection/protos/*.proto --python_out=.
-
-Add the object detection libraries to the PYTHONPATH
-
+    $
     $ echo 'export PYTHONPATH=$PYTHONPATH:/usr/local/lib/python3.6/dist-packages/tensorflow/models/research' >> $HOME/.bashrc
 
 Install Tensorflow Slim (optional)
