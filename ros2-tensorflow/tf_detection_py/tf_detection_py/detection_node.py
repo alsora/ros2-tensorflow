@@ -114,7 +114,7 @@ class DetectionNode(TensorflowNode):
 
         elapsed_time = self.get_clock().now() - start_time
         elapsed_time_ms = elapsed_time.nanoseconds / 1000000
-        self.get_logger().debug('Image detection took: %r milliseconds' % elapsed_time_ms)
+        self.get_logger().debug(f'Image detection took: {elapsed_time_ms} milliseconds')
 
         self.filter_detections(output_dict)
 

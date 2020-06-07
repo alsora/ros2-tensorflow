@@ -31,7 +31,7 @@ def main(args=None):
     client = node.create_client(ImageDetectionSrv, 'image_detection')
 
     def vision_info_callback(vision_info_msg):
-        node.get_logger().info('received vision info %r' % vision_info_msg)
+        node.get_logger().info(f'received vision info {repr(vision_info_msg)}')
 
     node.create_subscription(
         VisionInfoMsg, 'vision_info', vision_info_callback, qos_profile=qos_profile_vision_info)
@@ -52,9 +52,10 @@ def main(args=None):
         detections = future.result().detections.detections
         for det in detections:
             det_result = det.results[0]
-            node.get_logger().info('Detected object %d with score %f' % (det_result.id, det_result.score))
+            node.get_logger().info(
+                f'Detected object {det_result.id} with score {det_result.score}')
     else:
-        node.get_logger().error('Exception while calling service: %r' % future.exception())
+        node.get_logger().error(f'Exception while calling service: {future.exception()}')
 
     node.destroy_node()
     rclpy.shutdown()

@@ -31,7 +31,7 @@ def main(args=None):
     client = node.create_client(ImageClassificationSrv, 'image_classification')
 
     def vision_info_callback(vision_info_msg):
-        node.get_logger().info('received vision info %r' % vision_info_msg)
+        node.get_logger().info(f'received vision info {repr(vision_info_msg)}')
 
     node.create_subscription(
         VisionInfoMsg, 'vision_info', vision_info_callback, qos_profile=qos_profile_vision_info)
@@ -50,9 +50,9 @@ def main(args=None):
     rclpy.spin_until_future_complete(node, future)
     if future.result() is not None:
         classification = future.result().classification
-        node.get_logger().info('Result of classification:\n' + str(classification.results))
+        node.get_logger().info(f'Result of classification:\n{str(classification.results)}')
     else:
-        node.get_logger().error('Exception while calling service: %r' % future.exception())
+        node.get_logger().error(f'Exception while calling service: {repr(future.exception())}')
 
     node.destroy_node()
     rclpy.shutdown()

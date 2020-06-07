@@ -69,15 +69,17 @@ class ModelDescriptor:
             if os.path.isdir(downloaded_path):
                 joined_path = os.path.join(downloaded_path, self.model_filename)
                 if not os.path.exists(joined_path):
-                    print('Model filename:', self.model_filename)
-                    print('Model path:', joined_path)
-                    raise ValueError('The provided model filename does not exists in the downloaded directory')
+                    print(f'Model filename: {self.model_filename}')
+                    print(f'Model path: {joined_path}')
+                    raise ValueError(
+                        'The provided model filename does not exists in the downloaded directory')
                 self.model_path = joined_path
             else:
                 if self.model_filename and self.model_filename != downloaded_path:
-                    print('Model filename:', self.model_filename)
-                    print('Downloaded path', downloaded_path)
-                    raise ValueError('The downloaded path is not a directory and does not match the provided model filename')
+                    print(f'Model filename: {self.model_filename}')
+                    print(f'Downloaded path: {downloaded_path}')
+                    raise ValueError(
+                        'The provided model filename has not been found')
                 self.model_path = downloaded_path
 
         return self.model_path
@@ -129,8 +131,8 @@ def maybe_download_and_extract(url_source, download_directory, filename=None, ex
     if not os.path.exists(filepath):
 
         def _progress(count, block_size, total_size):
-            sys.stdout.write(
-                '\r>> Downloading %s %.1f%%' % (filename, float(count * block_size) / float(total_size) * 100.0))
+            percentage = float(count * block_size) / float(total_size) * 100.0
+            sys.stdout.write(f'\r>> Downloading {filename} {percentage:.1f}%')
             sys.stdout.flush()
 
         # The downloaded file must end with a correct extension to avoid problems when extracting it
@@ -138,12 +140,12 @@ def maybe_download_and_extract(url_source, download_directory, filename=None, ex
         urllib.request.urlretrieve(url_source, filepath_with_extension, _progress)
 
         statinfo = os.stat(filepath_with_extension)
-        print('Succesfully downloaded %s %s bytes.' % (filename, statinfo.st_size))
+        print(f'Succesfully downloaded {filename} {statinfo.st_size} bytes.')
         if (not (expected_bytes is None) and (expected_bytes != statinfo.st_size)):
-            raise Exception('Failed to verify ' + filename + '. Can you get to it with a browser?')
+            raise Exception(f'Failed to verify {filename}. Can you get to it with a browser?')
         if (extract):
             try:
-                print('Trying to extract archive', filepath_with_extension)
+                print(f'Trying to extract archive {filepath_with_extension}')
                 if tarfile.is_tarfile(filepath_with_extension):
                     with tarfile.open(filepath_with_extension, 'r') as tf:
                         # If the archive contains more than 1 file, extract into a directory

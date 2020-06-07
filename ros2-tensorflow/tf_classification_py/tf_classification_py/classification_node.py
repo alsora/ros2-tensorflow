@@ -66,7 +66,7 @@ class ClassificationNode(TensorflowNode):
 
         elapsed_time = self.get_clock().now() - start_time
         elapsed_time_ms = elapsed_time.nanoseconds / 1000000
-        self.get_logger().debug('Image classification took: %r milliseconds' % elapsed_time_ms)
+        self.get_logger().debug(f'Image classification took: {elapsed_time_ms} milliseconds')
 
         # Get top indices from softmax
         scores = np.squeeze(scores)
