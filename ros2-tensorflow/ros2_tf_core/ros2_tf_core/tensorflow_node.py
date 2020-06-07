@@ -15,7 +15,7 @@
 
 from rclpy.node import Node
 
-from ros2_tf_core.node.qos import qos_profile_vision_info
+from ros2_tf_core.qos import qos_profile_vision_info
 from vision_msgs.msg import VisionInfo
 
 

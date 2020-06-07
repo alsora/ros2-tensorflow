@@ -18,7 +18,7 @@ import numpy as np
 from object_detection.utils import ops as utils_ops
 import tensorflow as tf
 
-from ros2_tf_core.utils import models as models_utils
+from ros2_tf_core import models as models_utils
 
 
 class DetectionFrozenModel():

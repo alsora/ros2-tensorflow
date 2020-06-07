@@ -17,7 +17,7 @@ import os
 
 import object_detection
 
-from ros2_tf_core.utils import models as models_utils
+from ros2_tf_core import models as models_utils
 
 
 TENSORFLOW_OBJECT_DETECTION_DIR = os.path.dirname(object_detection.__file__)
