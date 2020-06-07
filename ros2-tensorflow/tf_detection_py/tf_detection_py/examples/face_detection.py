@@ -36,7 +36,7 @@ def main(args=None):
         extract=False)
 
     # Create a descriptor for the just downloaded network
-    SSD_FACE_DETECTION = models_utils.TensorflowModel().from_path(
+    SSD_FACE_DETECTION = models_utils.ModelDescriptor().from_path(
         model_path=model_path,
         label_path=label_path,
         save_load_format=models_utils.SaveLoadFormat.FROZEN_MODEL,

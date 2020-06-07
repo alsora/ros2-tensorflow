@@ -28,7 +28,7 @@ class SaveLoadFormat(Enum):
     SAVED_MODEL = 2
 
 
-class TensorflowModel:
+class ModelDescriptor:
 
     def __init__(self):
         self.url = None

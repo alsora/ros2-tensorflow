@@ -21,12 +21,12 @@ import tensorflow as tf
 from ros2_tf_core.utils import models as models_utils
 
 
-class FrozenDetectionModel():
+class DetectionFrozenModel():
 
     def __init__(self, tf_model):
 
         if tf_model.save_load_format != models_utils.SaveLoadFormat.FROZEN_MODEL:
-            raise ValueError('Creating a FrozenDetectionModel from a TensorflowModel with invalid format')
+            raise ValueError('Creating a DetectionFrozenModel from a ModelDescriptor with invalid format')
 
         # Load the model
         model_path = tf_model.compute_model_path()
@@ -75,12 +75,12 @@ class FrozenDetectionModel():
         return output_dict
 
 
-class SavedDetectionModel():
+class DetectionSavedModel():
 
     def __init__(self, tf_model):
 
         if tf_model.save_load_format != models_utils.SaveLoadFormat.SAVED_MODEL:
-            raise ValueError('Creating a FrozenDetectionModel from a TensorflowModel with invalid format')
+            raise ValueError('Creating a DetectionSavedModel from a ModelDescriptor with invalid format')
 
         # Load model
         model_path = tf_model.compute_model_path()
@@ -118,8 +118,8 @@ class SavedDetectionModel():
 def create(tf_model):
     # Create the model according to the specified format
     return {
-        models_utils.SaveLoadFormat.FROZEN_MODEL: lambda model: FrozenDetectionModel(tf_model),
-        models_utils.SaveLoadFormat.SAVED_MODEL: lambda model: SavedDetectionModel(tf_model)
+        models_utils.SaveLoadFormat.FROZEN_MODEL: lambda model: DetectionFrozenModel(tf_model),
+        models_utils.SaveLoadFormat.SAVED_MODEL: lambda model: DetectionSavedModel(tf_model)
     }[tf_model.save_load_format](tf_model)
 
 

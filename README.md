@@ -93,7 +93,7 @@ Test the image classification server by running in separate terminals
 
 The repository contains convenient APIs for loading Tensorflow models into the ROS 2 nodes.
 
-Models are defined using the `TensorflowModel` class, which acts as a descriptor for the model itself.
+Models are defined using the `ModelDescriptor` class, which contains all the information required for loading a model and performing inference on it.
 It can either contain a path where the model can be found on the machine or an URL where the model can be downloaded the first time.
 
 Different model formats are also supported, such as frozen models and saved models.

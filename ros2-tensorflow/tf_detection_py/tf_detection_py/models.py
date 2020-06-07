@@ -23,7 +23,7 @@ from ros2_tf_core.utils import models as models_utils
 TENSORFLOW_OBJECT_DETECTION_DIR = os.path.dirname(object_detection.__file__)
 COCO_LABELS = os.path.join(TENSORFLOW_OBJECT_DETECTION_DIR, 'data/mscoco_label_map.pbtxt')
 
-COCO_FASTER_RCNN = models_utils.TensorflowModel().from_url(
+COCO_FASTER_RCNN = models_utils.ModelDescriptor().from_url(
     url='http://download.tensorflow.org/models/object_detection/faster_rcnn_inception_v2_coco_2018_01_28.tar.gz',
     label_path=COCO_LABELS,
     download_directory=TENSORFLOW_OBJECT_DETECTION_DIR,
@@ -31,7 +31,7 @@ COCO_FASTER_RCNN = models_utils.TensorflowModel().from_url(
     save_load_format=models_utils.SaveLoadFormat.SAVED_MODEL,
     description='TensorFlow Faster RCNN Inception network for object detection, trained on COCO dataset. Produces boxes')
 
-COCO_MOBILENET = models_utils.TensorflowModel().from_url(
+COCO_MOBILENET = models_utils.ModelDescriptor().from_url(
     url='http://download.tensorflow.org/models/object_detection/ssd_mobilenet_v1_coco_2017_11_17.tar.gz',
     label_path=COCO_LABELS,
     download_directory=TENSORFLOW_OBJECT_DETECTION_DIR,
@@ -39,7 +39,7 @@ COCO_MOBILENET = models_utils.TensorflowModel().from_url(
     save_load_format=models_utils.SaveLoadFormat.SAVED_MODEL,
     description='TensorFlow Mobilenet network for object detection, trained on COCO dataset. Produces boxes')
 
-COCO_MASK_RCNN = models_utils.TensorflowModel().from_url(
+COCO_MASK_RCNN = models_utils.ModelDescriptor().from_url(
     url='http://download.tensorflow.org/models/object_detection/mask_rcnn_inception_v2_coco_2018_01_28.tar.gz',
     label_path=COCO_LABELS,
     download_directory=TENSORFLOW_OBJECT_DETECTION_DIR,
