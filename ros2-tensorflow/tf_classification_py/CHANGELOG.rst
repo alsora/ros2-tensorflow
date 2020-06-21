@@ -2,8 +2,8 @@
 Changelog for package tf_classification_py
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Forthcoming
------------
+0.1.0 (2020-06-21)
+------------------
 * rename ros2_tensorflow package to ros2_tf_core
 * download images for simple tests instead of using hardcoded paths
 * add support for saved models in tf_detection_py

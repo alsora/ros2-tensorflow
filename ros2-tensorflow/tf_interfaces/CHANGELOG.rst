@@ -2,8 +2,8 @@
 Changelog for package tf_interfaces
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Forthcoming
------------
+0.1.0 (2020-06-21)
+------------------
 * interface package minor cleanup
 * use vision_msgs detection2darray in detection node
 * add vision_msgs as dependency and use them for classification

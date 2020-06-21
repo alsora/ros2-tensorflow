@@ -2,8 +2,8 @@
 Changelog for package tf_detection_py
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Forthcoming
------------
+0.1.0 (2020-06-21)
+------------------
 * rename ros2_tensorflow package to ros2_tf_core
 * add cropped image to detections msg
 * add face detection example

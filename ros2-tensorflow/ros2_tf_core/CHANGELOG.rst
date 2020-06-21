@@ -2,8 +2,8 @@
 Changelog for package ros2_tf_core
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Forthcoming
------------
+0.1.0 (2020-06-21)
+------------------
 * rename ros2_tensorflow package to ros2_tf_core
 * add support for saved models in tf_detection_py
 * create method for publishing vision info in base class TensorflowNode
