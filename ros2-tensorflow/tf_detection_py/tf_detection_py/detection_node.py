@@ -169,7 +169,7 @@ class DetectionNode(TensorflowNode):
             det.header = detections.header
             det.results = []
             detected_object = ObjectHypothesisWithPose()
-            detected_object.id = classes[i].item()
+            detected_object.id = str(classes[i].item())
             detected_object.score = scores[i].item()
             det.results.append(detected_object)
 
