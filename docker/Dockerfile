@@ -1,7 +1,7 @@
 # @author Alberto Soragna (alberto dot soragna at gmail dot com)
 # @2018
 
-FROM osrf/ros:eloquent-desktop
+FROM osrf/ros:foxy-desktop
 LABEL maintainer="alberto dot soragna at gmail dot com"
 
 # working directory
@@ -24,7 +24,6 @@ RUN apt-get update && apt-get install -y \
     nano \
     python-dev \
     python3-pip \
-    ipython \
     unzip
 
 # pip
@@ -75,29 +74,13 @@ RUN apt-get install --no-install-recommends -y \
 RUN apt-get install --no-install-recommends -y \
   libcunit1-dev
 
-# package required for building rviz plugins, but not included in base image
-RUN apt-get update && apt-get install -y ros-eloquent-rviz-visual-testing-framework
-
-# install rqt tools
-RUN apt-get install -y \
-    ros-eloquent-python-qt-binding \
-    ros-eloquent-qt-gui-core \
-    ros-eloquent-rqt*
-
-# install cycloneDDS RMW implementation
-RUN apt-get install -y ros-eloquent-rmw-cyclonedds-cpp
-
-##### OPENCV
-
-RUN pip install opencv-contrib-python
-
 #### TENSORFLOW
 
 WORKDIR $HOME
 
 # install tensorflow
 #RUN export LD_LIBRARY_PATH=${LD_LIBRARY_PATH:+${LD_LIBRARY_PATH}:}/usr/local/cuda/extras/CUPTI/lib64
-RUN pip install tensorflow
+#RUN pip install tensorflow
 
 # tensorflow object detection dependencies from:
 # https://tensorflow-object-detection-api-tutorial.readthedocs.io/en/latest/install.html#install-prerequisites
@@ -116,10 +99,10 @@ RUN pip install \
 # get tensorflow models repository
 # currently object detection is part of research models that are not available on releases, so we use master
 # TODO: check v2.20 WIP object detection https://github.com/tensorflow/models/tree/v2.2.0/official/vision/detection
-RUN git clone https://github.com/tensorflow/models.git /usr/local/lib/python3.6/dist-packages/tensorflow/models
+RUN git clone https://github.com/tensorflow/models.git /usr/local/lib/python3.8/dist-packages/tensorflow/models
 
 # protobuf compilation
-WORKDIR /usr/local/lib/python3.6/dist-packages/tensorflow/models/research
+WORKDIR /usr/local/lib/python3.8/dist-packages/tensorflow/models/research
 RUN protoc object_detection/protos/*.proto --python_out=.
 
 # Tensorflow-Slim (required for image segmentation)
@@ -132,7 +115,7 @@ RUN pip install tf_slim
 #COPY scripts/coco/Makefile $HOME/cocoapi/PythonAPI/Makefile
 #RUN make
 #RUN cp -r pycocotools /usr/local/lib/python3.6/dist-packages/tensorflow/models/research
-RUN pip install pycocotools
+#RUN pip install pycocotools
 
 ##### ROS2 VISION OPEN CV
 
@@ -153,8 +136,8 @@ RUN mkdir -p $HOME/tf_ws/src
 ADD https://api.github.com/repos/alsora/ros2-tensorflow/git/refs/heads/master version.json
 RUN git clone https://github.com/alsora/ros2-tensorflow $HOME/tf_ws/src/ros2-tensorflow
 WORKDIR $HOME/tf_ws
-RUN rosdep install --from-paths src --ignore-src --rosdistro eloquent -y
-RUN /bin/bash -c 'source /opt/ros/eloquent/setup.sh; \
+RUN rosdep install --from-paths src --ignore-src --rosdistro foxy -y
+RUN /bin/bash -c 'source /opt/ros/foxy/setup.sh; \
   colcon build'
 
 #### SET ENVIRONMENT
@@ -163,11 +146,11 @@ WORKDIR $HOME
 
 RUN echo ' \n\
 echo "Sourcing ROS2 packages..." \n\
-source /opt/ros/eloquent/setup.sh \n\
+source /opt/ros/foxy/setup.sh \n\
 source $HOME/tf_ws/install/local_setup.sh' >> $HOME/.bashrc
 
 RUN echo ' \n\
-export PYTHONPATH=$PYTHONPATH:/usr/local/lib/python3.6/dist-packages/tensorflow/models/research' >> $HOME/.bashrc
+export PYTHONPATH=$PYTHONPATH:/usr/local/lib/python3.8/dist-packages/tensorflow/models/research' >> $HOME/.bashrc
 
 RUN echo ' \n\
 alias python="python3"' >> $HOME/.bashrc

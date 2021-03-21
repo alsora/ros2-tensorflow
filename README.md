@@ -10,8 +10,10 @@ The output can be directly visualized through Rviz
 In order to build the `ros2-tensorflow` package, the following dependencies are needed
 
 Required dependencies:
+ - [ROS2 Foxy](https://docs.ros.org/en/foxy/Installation.html)
+
+Rosdep dependencies:
  - [OpenCV Python](https://pypi.org/project/opencv-python/)
- - [ROS2 Eloquent](https://index.ros.org/doc/ros2/Installation/)
  - [Tensorflow](https://www.tensorflow.org/install/)
  - [Vision Msgs](https://github.com/Kukanani/vision_msgs)
 
@@ -41,17 +43,18 @@ Get the source code and create the ROS 2 workspace
 
 Install required dependencies using rosdep
 
-    $ rosdep install --from-paths src --ignore-src --rosdistro eloquent -y
+    $ rosdep install --from-paths src --ignore-src --rosdistro foxy -y
 
-Install the Tensorflow Object Detection Models (optional)
+Install the Tensorflow Object Detection Models (optional).
+Make sure to specify the correct Python version according to your system.
 
     $ sudo apt-get install -y protobuf-compiler python-lxml python-tk
     $ pip install --user Cython contextlib2 jupyter matplotlib Pillow
-    $ git clone https://github.com/tensorflow/models.git /usr/local/lib/python3.6/dist-packages/tensorflow/models
-    $ cd usr/local/lib/python3.6/dist-packages/tensorflow/models/research
+    $ git clone https://github.com/tensorflow/models.git /usr/local/lib/python3.8/dist-packages/tensorflow/models
+    $ cd usr/local/lib/python3.8/dist-packages/tensorflow/models/research
     $ protoc object_detection/protos/*.proto --python_out=.
     $
-    $ echo 'export PYTHONPATH=$PYTHONPATH:/usr/local/lib/python3.6/dist-packages/tensorflow/models/research' >> $HOME/.bashrc
+    $ echo 'export PYTHONPATH=$PYTHONPATH:/usr/local/lib/python3.8/dist-packages/tensorflow/models/research' >> $HOME/.bashrc
 
 Install Tensorflow Slim (optional)
     
