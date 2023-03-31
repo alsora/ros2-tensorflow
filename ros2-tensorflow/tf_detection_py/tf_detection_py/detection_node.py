@@ -169,23 +169,21 @@ class DetectionNode(TensorflowNode):
             det.header = detections.header
             det.results = []
             detected_object = ObjectHypothesisWithPose()
-            detected_object.id = str(classes[i].item())
-            detected_object.score = scores[i].item()
+            detected_object.hypothesis.class_id = str(classes[i].item())
+            detected_object.hypothesis.score = scores[i].item()
             det.results.append(detected_object)
 
             # box is ymin, xmin, ymax, xmax in normalized coordinates
             box = boxes[i]
             det.bbox.size_y = (box[2] - box[0]) * img_height
             det.bbox.size_x = (box[3] - box[1]) * img_width
-            det.bbox.center.x = (box[1] + box[3]) * img_height / 2
-            det.bbox.center.y = (box[0] + box[2]) * img_width / 2
+            det.bbox.center.position.x = (box[1] + box[3]) * img_height / 2
+            det.bbox.center.position.y = (box[0] + box[2]) * img_width / 2
 
             if (self.republish_image):
                 box_img = image_np[
                     int(box[0]*img_height):int(box[2]*img_height),
                     int(box[1]*img_width):int(box[3]*img_width)]
-
-                det.source_img = img_utils.image_np_to_image_msg(box_img)
 
             detections.detections.append(det)
 

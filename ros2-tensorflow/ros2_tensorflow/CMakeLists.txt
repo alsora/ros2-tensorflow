@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.5)
+cmake_minimum_required(VERSION 3.8)
 project(ros2_tensorflow)
 
 if(NOT CMAKE_CXX_STANDARD)

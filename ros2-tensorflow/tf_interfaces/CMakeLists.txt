@@ -1,5 +1,4 @@
-cmake_minimum_required(VERSION 3.5)
-
+cmake_minimum_required(VERSION 3.8)
 project(tf_interfaces)
 
 # Default to C++14
