@@ -55,7 +55,7 @@ Make sure to specify the correct Python version according to your system.
     $ cd usr/local/lib/$PYTHONDIRNAME/dist-packages/tensorflow/models/research
     $ sudo protoc object_detection/protos/*.proto --python_out=.
     $
-    $ echo 'export PYTHONPATH=$PYTHONPATH:/usr/local/lib/$PYTHONDIRNAME/dist-packages/tensorflow/models/research' >> $HOME/.bashrc
+    $ echo "export PYTHONPATH=\$PYTHONPATH:/usr/local/lib/$PYTHONDIRNAME/dist-packages/tensorflow/models/research" >> $HOME/.bashrc
 
 Install Tensorflow Slim (optional)
     
