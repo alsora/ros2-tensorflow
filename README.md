@@ -43,12 +43,12 @@ Get the source code and create the ROS 2 workspace
 
 Install required dependencies using rosdep
 
-    $ rosdep install --from-paths src --ignore-src --rosdistro foxy -y
+    $ rosdep install --from-paths src --ignore-src --rosdistro humble -y
 
 Install the Tensorflow Object Detection Models (optional).
 Make sure to specify the correct Python version according to your system.
 
-    $ sudo apt-get install -y protobuf-compiler python-lxml python-tk
+    $ sudo apt-get install -y protobuf-compiler python3-lxml python-tk
     $ pip install --user Cython contextlib2 jupyter matplotlib Pillow
     $ git clone https://github.com/tensorflow/models.git /usr/local/lib/python3.8/dist-packages/tensorflow/models
     $ cd usr/local/lib/python3.8/dist-packages/tensorflow/models/research
