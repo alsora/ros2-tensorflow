@@ -53,7 +53,7 @@ Make sure to specify the correct Python version according to your system.
     $ PYTHONDIRNAME=`python3 --version | awk -F ' ' '{ print $2 }' | awk -F . '{ print "python" $1 "." $2 }'`
     $ sudo mkdir models; sudo chmod 757 models
     $ git clone https://github.com/tensorflow/models.git /usr/local/lib/$PYTHONDIRNAME/dist-packages/tensorflow/models
-    $ cd usr/local/lib/$PYTHONDIRNAME/dist-packages/tensorflow/models/research
+    $ cd /usr/local/lib/$PYTHONDIRNAME/dist-packages/tensorflow/models/research
     $ protoc object_detection/protos/*.proto --python_out=.
     $
     $ echo "export PYTHONPATH=\$PYTHONPATH:/usr/local/lib/$PYTHONDIRNAME/dist-packages/tensorflow/models/research" >> $HOME/.bashrc
