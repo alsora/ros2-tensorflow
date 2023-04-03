@@ -50,11 +50,12 @@ Make sure to specify the correct Python version according to your system.
 
     $ sudo apt-get install -y protobuf-compiler python3-lxml python-tk
     $ pip install --user Cython contextlib2 jupyter matplotlib Pillow
-    $ git clone https://github.com/tensorflow/models.git /usr/local/lib/python3.8/dist-packages/tensorflow/models
-    $ cd usr/local/lib/python3.8/dist-packages/tensorflow/models/research
-    $ protoc object_detection/protos/*.proto --python_out=.
+    $ PYTHONDIRNAME=`python3 --version | awk -F ' ' '{ print $2 }' | awk -F . '{ print "python" $1 "." $2 }'`
+    $ sudo git clone https://github.com/tensorflow/models.git /usr/local/lib/$PYTHONDIRNAME/dist-packages/tensorflow/models
+    $ cd usr/local/lib/$PYTHONDIRNAME/dist-packages/tensorflow/models/research
+    $ sudo protoc object_detection/protos/*.proto --python_out=.
     $
-    $ echo 'export PYTHONPATH=$PYTHONPATH:/usr/local/lib/python3.8/dist-packages/tensorflow/models/research' >> $HOME/.bashrc
+    $ echo 'export PYTHONPATH=$PYTHONPATH:/usr/local/lib/$PYTHONDIRNAME/dist-packages/tensorflow/models/research' >> $HOME/.bashrc
 
 Install Tensorflow Slim (optional)
     
