@@ -10,7 +10,7 @@ The output can be directly visualized through Rviz
 In order to build the `ros2-tensorflow` package, the following dependencies are needed
 
 Required dependencies:
- - [ROS2 Foxy](https://docs.ros.org/en/foxy/Installation.html)
+ - [ROS2 Humble](https://docs.ros.org/en/humble/Installation.html)
 
 Rosdep dependencies:
  - [OpenCV Python](https://pypi.org/project/opencv-python/)
