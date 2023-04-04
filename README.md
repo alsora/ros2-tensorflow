@@ -46,10 +46,10 @@ Install required dependencies using rosdep
     $ rosdep install --from-paths src --ignore-src --rosdistro humble -y
 
 Install the Tensorflow Object Detection Models (optional).
-Make sure to specify the correct Python version according to your system.
 
     $ sudo apt-get install -y protobuf-compiler python3-lxml python-tk
     $ pip install --user Cython contextlib2 jupyter matplotlib Pillow
+    $ pip3 install --upgrade protobuf==3.20.3
     $ PYTHONDIRNAME=`python3 --version | awk -F ' ' '{ print $2 }' | awk -F . '{ print "python" $1 "." $2 }'`
     $ sudo mkdir models; sudo chmod 757 models
     $ git clone https://github.com/tensorflow/models.git /usr/local/lib/$PYTHONDIRNAME/dist-packages/tensorflow/models
