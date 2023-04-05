@@ -1,7 +1,7 @@
 # @author Alberto Soragna (alberto dot soragna at gmail dot com)
 # @2018
 
-FROM osrf/ros:foxy-desktop
+FROM osrf/ros:humble-desktop
 LABEL maintainer="alberto dot soragna at gmail dot com"
 
 # working directory
@@ -22,7 +22,7 @@ RUN apt-get update && apt-get install -y \
     gdb \
     vim \
     nano \
-    python-dev \
+    python3-dev \
     python3-pip \
     unzip
 
@@ -63,7 +63,8 @@ RUN pip3 install -U \
   pytest \
   pytest-cov \
   pytest-runner \
-  setuptools
+  setuptools \
+  protobuf==3.20.3
 
 # install Fast-RTPS dependencies
 RUN apt-get install --no-install-recommends -y \
@@ -87,8 +88,9 @@ WORKDIR $HOME
 # https://github.com/tensorflow/models/blob/master/research/object_detection/g3doc/installation.md
 RUN apt-get install -y \
   protobuf-compiler \
-  python-lxml \
+  python3-lxml \
   python-tk
+
 RUN pip install \
   Cython \
   contextlib2 \
@@ -99,10 +101,10 @@ RUN pip install \
 # get tensorflow models repository
 # currently object detection is part of research models that are not available on releases, so we use master
 # TODO: check v2.20 WIP object detection https://github.com/tensorflow/models/tree/v2.2.0/official/vision/detection
-RUN git clone https://github.com/tensorflow/models.git /usr/local/lib/python3.8/dist-packages/tensorflow/models
+RUN git clone https://github.com/tensorflow/models.git /usr/local/lib/python3.10/dist-packages/tensorflow/models
 
 # protobuf compilation
-WORKDIR /usr/local/lib/python3.8/dist-packages/tensorflow/models/research
+WORKDIR /usr/local/lib/python3.10/dist-packages/tensorflow/models/research
 RUN protoc object_detection/protos/*.proto --python_out=.
 
 # Tensorflow-Slim (required for image segmentation)
@@ -136,8 +138,8 @@ RUN mkdir -p $HOME/tf_ws/src
 ADD https://api.github.com/repos/alsora/ros2-tensorflow/git/refs/heads/master version.json
 RUN git clone https://github.com/alsora/ros2-tensorflow $HOME/tf_ws/src/ros2-tensorflow
 WORKDIR $HOME/tf_ws
-RUN rosdep install --from-paths src --ignore-src --rosdistro foxy -y
-RUN /bin/bash -c 'source /opt/ros/foxy/setup.sh; \
+RUN rosdep install --from-paths src --ignore-src --rosdistro humble -y
+RUN /bin/bash -c 'source /opt/ros/humble/setup.sh; \
   colcon build'
 
 #### SET ENVIRONMENT
@@ -146,11 +148,11 @@ WORKDIR $HOME
 
 RUN echo ' \n\
 echo "Sourcing ROS2 packages..." \n\
-source /opt/ros/foxy/setup.sh \n\
+source /opt/ros/humble/setup.sh \n\
 source $HOME/tf_ws/install/local_setup.sh' >> $HOME/.bashrc
 
 RUN echo ' \n\
-export PYTHONPATH=$PYTHONPATH:/usr/local/lib/python3.8/dist-packages/tensorflow/models/research' >> $HOME/.bashrc
+export PYTHONPATH=$PYTHONPATH:/usr/local/lib/python3.10/dist-packages/tensorflow/models/research' >> $HOME/.bashrc
 
 RUN echo ' \n\
 alias python="python3"' >> $HOME/.bashrc

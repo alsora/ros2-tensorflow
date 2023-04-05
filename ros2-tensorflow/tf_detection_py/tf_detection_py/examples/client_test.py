@@ -51,7 +51,7 @@ def main(args=None):
         for det in detections:
             det_result = det.results[0]
             node.get_logger().info(
-                f'Detected object {det_result.id} with score {det_result.score}')
+                f'Detected object {det_result.hypothesis.class_id} with score {det_result.hypothesis.score}')
     else:
         node.get_logger().error(f'Exception while calling service: {future.exception()}')
 

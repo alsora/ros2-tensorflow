@@ -101,7 +101,7 @@ class ClassificationNode(TensorflowNode):
         response.classification.results = []
         for i in range(len(classes)):
             hypotesis = ObjectHypothesis()
-            hypotesis.id = classes[i].item()
+            hypotesis.class_id = str(classes[i].item())
             hypotesis.score = scores[i].item()
             response.classification.results.append(hypotesis)
 
