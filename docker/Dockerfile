@@ -136,8 +136,7 @@ RUN apt-get update
 
 RUN mkdir -p $HOME/tf_ws/src
 ADD https://api.github.com/repos/alsora/ros2-tensorflow/git/refs/heads/master version.json
-#RUN git clone https://github.com/alsora/ros2-tensorflow $HOME/tf_ws/src/ros2-tensorflow
-RUN git clone https://github.com/beechwoods-software/ros2-tensorflow $HOME/tf_ws/src/ros2-tensorflow
+RUN git clone https://github.com/alsora/ros2-tensorflow $HOME/tf_ws/src/ros2-tensorflow
 WORKDIR $HOME/tf_ws
 RUN rosdep install --from-paths src --ignore-src --rosdistro humble -y
 RUN /bin/bash -c 'source /opt/ros/humble/setup.sh; \
